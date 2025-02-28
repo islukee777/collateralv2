@@ -179,3 +179,17 @@
   position: relative;
   display: inline-block;
 }
+.drag-handle {
+  cursor: move;
+}
+
+.drag-handle:hover {
+  outline: 2px solid blue;
+}
+.drag-handle, .react-resizable {
+  will-change: transform;
+  transition: none; /* Prevent layout shifts */
+}
+.react-resizable {
+  position: relative;
+}
