@@ -1,9 +1,9 @@
-
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button"; // Import Button for shape selection
 
 interface CollateralSettings {
   backgroundColor: string;
@@ -16,6 +16,7 @@ interface CollateralSettings {
   backgroundImageUrl: string | null;
   backgroundOpacity: number;
   layout: string;
+  shape: "rectangle" | "square" | "circle"; // Added shape property
   pattern: string;
   fontFamily: string;
   textStyle: {
@@ -72,9 +73,55 @@ const CollateralLayout = ({ settings, updateSettings }: CollateralLayoutProps) =
     updateSettings({ backgroundImageUrl: null });
   };
 
+  // Handler for shape selection
+  const handleShapeChange = (shape: "rectangle" | "square" | "circle") => {
+    updateSettings({ shape });
+  };
+
   return (
     <div className="space-y-6 text-white">
+      {/* New Shape Selection Section */}
       <div>
+        <h3 className="text-lg font-medium mb-4">Shape</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Button
+            variant={settings.shape === "rectangle" ? "default" : "outline"}
+            className={`w-full rounded-xl ${
+              settings.shape === "rectangle"
+                ? "bg-meandubrand text-darkgreen"
+                : "border-white/20 text-white hover:bg-white/10"
+            }`}
+            onClick={() => handleShapeChange("rectangle")}
+          >
+            Rectangle
+          </Button>
+          <Button
+            variant={settings.shape === "square" ? "default" : "outline"}
+            className={`w-full rounded-xl ${
+              settings.shape === "square"
+                ? "bg-meandubrand text-darkgreen"
+                : "border-white/20 text-white hover:bg-white/10"
+            }`}
+            onClick={() => handleShapeChange("square")}
+          >
+            Square
+          </Button>
+          <Button
+            variant={settings.shape === "circle" ? "default" : "outline"}
+            className={`w-full rounded-xl ${
+              settings.shape === "circle"
+                ? "bg-meandubrand text-darkgreen"
+                : "border-white/20 text-white hover:bg-white/10"
+            }`}
+            onClick={() => handleShapeChange("circle")}
+          >
+            Circle
+          </Button>
+        </div>
+      </div>
+
+      {/* Existing Layout Style Section */}
+      <div className="pt-4 border-t border-white/10">
         <h3 className="text-lg font-medium mb-4">Layout Style</h3>
         <RadioGroup 
           value={settings.layout}
