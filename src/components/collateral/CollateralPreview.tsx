@@ -50,11 +50,6 @@ interface CollateralSettings {
   qrCodeSize: number;
   venueNameSize: number;
   logoSize: { width: number; height: number };
-  tableNumberDragged: boolean;
-  actionTextDragged: boolean;
-  qrCodeDragged: boolean;
-  venueNameDragged: boolean;
-  logoDragged: boolean;
 }
 
 interface CollateralPreviewProps {
@@ -192,7 +187,7 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
   const containerStyle: React.CSSProperties = {
     backgroundColor: settings.backgroundColor,
     color: settings.textColor,
-    borderRadius: settings.shape === "circle" ? "50%" : "20px",
+    borderRadius: settings.shape === "circle" ? "50%" : `${settings.cornerRadius}px`,
     position: "relative",
     width: `${containerWidth}px`,
     height: `${containerHeight}px`,
@@ -201,76 +196,130 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     ...getPatternStyle(),
   };
 
-  // Adjust initial positions based on shape (only if not dragged)
-  const adjustPositionForShape = (originalPosition: { x: number; y: number }, element: string) => {
-    const hasBeenDragged = {
-      tableNumber: settings.tableNumberDragged,
-      actionText: settings.actionTextDragged,
-      qrCode: settings.qrCodeDragged,
-      venueName: settings.venueNameDragged,
-      logo: settings.logoDragged
-    }[element];
+  // Define fixed position styles for initial positioning
+  const getFixedPositionStyles = () => {
+    const containerSize = settings.shape === "rectangle" ? { width: 300, height: 400 } : { width: 400, height: 400 };
+    const centerX = containerSize.width / 2;
 
-    if (hasBeenDragged) {
-      return originalPosition;
-    }
+    return {
+      tableNumber: {
+        fontSize: `${
+          settings.shape === "circle"
+            ? Math.max(36, settings.fontSize.tableNumber * 0.75)
+            : settings.fontSize.tableNumber
+        }px`,
+        ...getTextStyles(),
+        ...(settings.shape === "rectangle"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 25 }
+                : settings.layout === "compact"
+                ? { x: 20, y: 20 }
+                : { x: centerX, y: 40 }),
+            }
+          : settings.shape === "square"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 20 }
+                : settings.layout === "compact"
+                ? { x: 15, y: 15 }
+                : { x: centerX, y: 30 }),
+            }
+          : {
+              ...(settings.layout === "standard"
+                ? { x: centerX, y: containerSize.height * 0.1 }
+                : settings.layout === "compact"
+                ? { x: centerX, y: containerSize.height * 0.05 }
+                : { x: centerX, y: containerSize.height * 0.1 }),
+            }),
+      },
 
-    if (settings.shape === "rectangle") {
-      return originalPosition;
-    }
+      actionText: {
+        fontSize: `${
+          settings.shape === "circle" ? 35 :
+          settings.shape === "square" ? 33 :
+          25
+        }px`,
+        maxWidth: settings.shape === "rectangle" ? "300px" : settings.shape === "square" ? "300px" : "3000px",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        ...getTextStyles(),
+        ...(settings.shape === "rectangle"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 90 }
+                : settings.layout === "compact"
+                ? { x: 20, y: 800 }
+                : { x: centerX, y: 120 }),
+            }
+          : settings.shape === "square"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 100 }
+                : settings.layout === "compact"
+                ? { x: 15, y: 70 }
+                : { x: centerX, y: 100 }),
+            }
+          : {
+              ...(settings.layout === "standard"
+                ? { x: centerX, y: containerSize.height * 0.25 }
+                : settings.layout === "compact"
+                ? { x: centerX, y: containerSize.height * 0.20 }
+                : { x: centerX, y: containerSize.height * 0.25 }),
+            }),
+      },
 
-    const containerSize = settings.shape === "square" ? 400 : 400;
-    const centerX = containerSize / 2;
-    const adjustedPosition = { ...originalPosition };
+      qrCode: {
+        ...(settings.shape === "rectangle"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 160 }
+                : settings.layout === "compact"
+                ? { x: 20, y: 150 }
+                : { x: centerX, y: 200 }),
+            }
+          : settings.shape === "square"
+          ? {
+              ...(settings.layout === "standard"
+                ? { x: 40, y: 170 }
+                : settings.layout === "compact"
+                ? { x: 15, y: 140 }
+                : { x: centerX, y: 180 }),
+            }
+          : {
+              ...(settings.layout === "standard"
+                ? { x: centerX, y: containerSize.height * 0.5 }
+                : settings.layout === "compact"
+                ? { x: centerX, y: containerSize.height * 0.35 }
+                : { x: centerX, y: containerSize.height * 0.4 }),
+            }),
+      },
 
-    if (settings.shape === "square") {
-      switch (element) {
-        case "tableNumber":
-          adjustedPosition.x = 40;
-          adjustedPosition.y = 20;
-          break;
-        case "actionText":
-          adjustedPosition.x = 40;
-          adjustedPosition.y = 100;
-          break;
-        case "qrCode":
-          adjustedPosition.x = 40;
-          adjustedPosition.y = 170;
-          break;
-        case "venueName":
-          adjustedPosition.x = centerX;
-          adjustedPosition.y = containerSize - 15;
-          break;
-        case "logo":
-          adjustedPosition.x = containerSize - 35;
-          adjustedPosition.y = 35;
-          break;
-      }
-    } else if (settings.shape === "circle") {
-      switch (element) {
-        case "tableNumber":
-          adjustedPosition.x = centerX;
-          adjustedPosition.y = containerSize * 0.1;
-          break;
-        case "actionText":
-          adjustedPosition.x = centerX;
-          adjustedPosition.y = containerSize * 0.25;
-          break;
-        case "qrCode":
-          adjustedPosition.x = centerX;
-          adjustedPosition.y = containerSize * 0.5;
-          break;
-        case "venueName":
-          adjustedPosition.x = centerX;
-          adjustedPosition.y = containerSize * 0.95;
-          break;
-        case "logo":
-          adjustedPosition.x = containerSize * 0.95;
-          adjustedPosition.y = containerSize * 0.05;
-          break;
-      }
-    }
-    return adjustedPosition;
+      venueName: {
+        fontSize: `${
+          settings.shape === "circle"
+            ? Math.max(16, settings.fontSize.venueName * 0.8)
+            : settings.fontSize.venueName
+        }px`,
+        ...getTextStyles(),
+        ...(settings.shape === "rectangle"
+          ? { x: centerX, y: containerSize.height - 30 } // Adjust for element height (~20px)
+          : settings.shape === "square"
+          ? { x: centerX, y: containerSize.height - 35 }
+          : { x: centerX, y: containerSize.height * 0.95 - 20 }),
+      },
+
+      logo: {
+        height: settings.shape === "circle" ? "24px" : "31px",
+        width: "auto",
+        ...(settings.shape === "rectangle"
+          ? { x: containerSize.width - 51, y: 10 } // 300 - 31 (width) - 20 (right)
+          : settings.shape === "square"
+          ? { x: containerSize.width - 46, y: 35 } // 400 - 31 - 15
+          : { x: containerSize.width * 0.95 - 24, y: containerSize.height * 0.05 }), // 24px width
+      },
+    };
   };
 
   // Handle drag stop for updating position
@@ -279,23 +328,18 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     switch (element) {
       case "tableNumber":
         updates.tableNumberPosition = { x: data.x, y: data.y };
-        updates.tableNumberDragged = true;
         break;
       case "actionText":
         updates.actionTextPosition = { x: data.x, y: data.y };
-        updates.actionTextDragged = true;
         break;
       case "qrCode":
         updates.qrCodePosition = { x: data.x, y: data.y };
-        updates.qrCodeDragged = true;
         break;
       case "venueName":
         updates.venueNamePosition = { x: data.x, y: data.y };
-        updates.venueNameDragged = true;
         break;
       case "logo":
         updates.logoPosition = { x: data.x, y: data.y };
-        updates.logoDragged = true;
         break;
     }
     updateSettings(updates);
@@ -346,7 +390,7 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     backgroundContainerStyle.left = 0;
     backgroundContainerStyle.right = 0;
     backgroundContainerStyle.bottom = 0;
-    backgroundContainerStyle.borderRadius = settings.shape === "circle" ? "50%" : "20px";
+    backgroundContainerStyle.borderRadius = settings.shape === "circle" ? "50%" : `${settings.cornerRadius}px`;
     backgroundContainerStyle.zIndex = 0;
   }
 
@@ -359,6 +403,8 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
       bottom: containerHeight - elementHeight,
     };
   };
+
+  const positions = getFixedPositionStyles();
 
   return (
     <div
@@ -375,11 +421,11 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
       >
         {/* Table Number */}
         <Draggable
-          position={adjustPositionForShape(settings.tableNumberPosition, "tableNumber")}
+          position={settings.tableNumberPosition}
           onStop={(e, data) => handleDragStop("tableNumber", e, data)}
           bounds={getElementBounds(settings.tableNumberSize * 2, settings.tableNumberSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
             <ResizableBox
               width={settings.tableNumberSize * 2}
               height={settings.tableNumberSize}
@@ -398,11 +444,11 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
 
         {/* Action Text */}
         <Draggable
-          position={adjustPositionForShape(settings.actionTextPosition, "actionText")}
+          position={settings.actionTextPosition}
           onStop={(e, data) => handleDragStop("actionText", e, data)}
           bounds={getElementBounds(settings.actionTextSize * 4, settings.actionTextSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
             <ResizableBox
               width={settings.actionTextSize * 4}
               height={settings.actionTextSize}
@@ -430,11 +476,11 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
 
         {/* QR Code */}
         <Draggable
-          position={adjustPositionForShape(settings.qrCodePosition, "qrCode")}
+          position={settings.qrCodePosition}
           onStop={(e, data) => handleDragStop("qrCode", e, data)}
           bounds={getElementBounds(settings.qrCodeSize, settings.qrCodeSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
             <ResizableBox
               width={settings.qrCodeSize}
               height={settings.qrCodeSize}
@@ -461,11 +507,11 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
         {/* Venue Name */}
         {settings.venueName && (
           <Draggable
-            position={adjustPositionForShape(settings.venueNamePosition, "venueName")}
+            position={settings.venueNamePosition}
             onStop={(e, data) => handleDragStop("venueName", e, data)}
             bounds={getElementBounds(settings.venueNameSize * 3, settings.venueNameSize)}
           >
-            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
               <ResizableBox
                 width={settings.venueNameSize * 3}
                 height={settings.venueNameSize}
@@ -486,11 +532,11 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
         {/* Logo */}
         {settings.logoUrl && (
           <Draggable
-            position={adjustPositionForShape(settings.logoPosition, "logo")}
+            position={settings.logoPosition}
             onStop={(e, data) => handleDragStop("logo", e, data)}
             bounds={getElementBounds(settings.logoSize.width, settings.logoSize.height)}
           >
-            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
               <ResizableBox
                 width={settings.logoSize.width}
                 height={settings.logoSize.height}

@@ -68,11 +68,6 @@ interface CollateralSettings {
   qrCodeSize: number;
   venueNameSize: number;
   logoSize: { width: number; height: number };
-  tableNumberDragged: boolean;
-  actionTextDragged: boolean;
-  qrCodeDragged: boolean;
-  venueNameDragged: boolean;
-  logoDragged: boolean;
 }
 
 // Default collateral settings
@@ -113,18 +108,13 @@ const defaultSettings: CollateralSettings = {
   tableNumberPosition: { x: 40, y: 25 },
   actionTextPosition: { x: 40, y: 90 },
   qrCodePosition: { x: 40, y: 160 },
-  venueNamePosition: { x: 150, y: 370 }, // Adjusted to better center at bottom
+  venueNamePosition: { x: 150, y: 370 }, // Adjusted for element height
   logoPosition: { x: 260, y: 10 },
   tableNumberSize: 48,
   actionTextSize: 30,
   qrCodeSize: 130,
   venueNameSize: 20,
   logoSize: { width: 31, height: 31 },
-  tableNumberDragged: false,
-  actionTextDragged: false,
-  qrCodeDragged: false,
-  venueNameDragged: false,
-  logoDragged: false,
 };
 
 const Design = () => {
