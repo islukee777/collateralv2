@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bangers&family=Borel&family=Cherry+Cream+Soda&family=Chewy&family=Edu+VIC+WA+NT+Beginner:wght@400;700&family=Fugaz+One&family=Indie+Flower&family=Noto+Sans+Warang+Citi&family=Poiret+One&family=Short+Stack&family=Sour+Gummy:ital,wght@0,400;1,400&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -243,4 +244,10 @@
 .drag-handle img {
   -webkit-user-drag: none;
   user-drag: none;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
