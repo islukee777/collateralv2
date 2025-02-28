@@ -182,7 +182,7 @@ const Design = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Left Side - Collateral Preview */}
           <div className="flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md mx-auto bg-white/50 rounded-3xl p-8 premium-shadow overflow-visible">
+            <div className="w-full max-w-md mx-auto bg-white/100 rounded-3xl p-8 premium-shadow overflow-visible">
               <CollateralPreview settings={settings} />
             </div>
           </div>
