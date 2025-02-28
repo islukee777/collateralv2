@@ -173,7 +173,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
     maxWidth: settings.shape === "rectangle" ? "300px" : "none",
     height: settings.shape === "circle" ? "400px" : "auto",
     margin: "0 auto",
-    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2)", // Enhanced shadow for visibility
+    boxShadow: "0 10px 20px rgba(120, 120, 120, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3)", // Even lighter shadow for contrast
     ...getPatternStyle(),
   };
 
@@ -336,7 +336,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
 
   return (
     <div
-      className="rounded-3xl overflow-hidden w-full max-w-md mx-auto relative acrylic-thickness"
+      className="rounded-3xl w-full max-w-md mx-auto relative acrylic-thickness"
       style={containerStyle}
     >
       {/* Background image with opacity */}

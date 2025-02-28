@@ -35,7 +35,7 @@ interface CollateralSettings {
   backgroundImageUrl: string | null;
   backgroundOpacity: number;
   layout: string;
-  shape: "rectangle" | "square" | "circle"; // Added shape property
+  shape: "rectangle" | "square" | "circle";
   pattern: string;
   fontFamily: string;
   textStyle: {
@@ -62,24 +62,24 @@ interface CollateralSettings {
 
 // Default collateral settings
 const defaultSettings: CollateralSettings = {
-  backgroundColor: "#D8465E", // Red background to match example
+  backgroundColor: "#D8465E",
   textColor: "#FFFFFF",
-  tableNumber: "100", // Changed to match the example image
+  tableNumber: "100",
   actionText: "Scan, Order & Pay",
   venueName: "",
   qrValue: "https://meand.u/demo",
   logoUrl: null,
   backgroundImageUrl: null,
   backgroundOpacity: 1.0,
-  layout: "standard", // standard, compact, centered
-  shape: "rectangle", // Default shape set to rectangle
-  pattern: "waves", // Set waves pattern to match example
-  fontFamily: "'Poppins', sans-serif", // Set Poppins as default font
+  layout: "standard",
+  shape: "rectangle",
+  pattern: "waves",
+  fontFamily: "'Poppins', sans-serif",
   textStyle: {
     bold: false,
     underline: false,
     highlight: false,
-    highlightColor: "#c8ff00" // me&u brand green
+    highlightColor: "#c8ff00"
   },
   icons: {
     coffee: false,
@@ -92,7 +92,7 @@ const defaultSettings: CollateralSettings = {
   cornerRadius: 20,
   fontSize: {
     tableNumber: 48,
-    actionText: 30, // Minimum 30px for action text
+    actionText: 30,
     venueName: 20
   }
 };
@@ -182,7 +182,7 @@ const Design = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Left Side - Collateral Preview */}
           <div className="flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md mx-auto bg-white/5 rounded-3xl p-8 premium-shadow">
+            <div className="w-full max-w-md mx-auto bg-white/50 rounded-3xl p-8 premium-shadow overflow-visible">
               <CollateralPreview settings={settings} />
             </div>
           </div>
