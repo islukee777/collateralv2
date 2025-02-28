@@ -58,6 +58,18 @@ interface CollateralSettings {
     actionText: number;
     venueName: number;
   };
+
+// Add position and size for each element
+tableNumberPosition: { x: number; y: number };
+actionTextPosition: { x: number; y: number };
+qrCodePosition: { x: number; y: number };
+venueNamePosition: { x: number; y: number };
+logoPosition: { x: number; y: number };
+tableNumberSize: number; // Font size
+actionTextSize: number; // Font size
+qrCodeSize: number; // Width/height in pixels
+venueNameSize: number; // Font size
+logoSize: { width: number; height: number }; // Width/height in pixels
 }
 
 // Default collateral settings
@@ -94,7 +106,19 @@ const defaultSettings: CollateralSettings = {
     tableNumber: 48,
     actionText: 30,
     venueName: 20
-  }
+  },
+  // Initial positions (in pixels relative to the top-left corner)
+  tableNumberPosition: { x: 40, y: 25 }, // Matches initial fixedPositionStyles
+  actionTextPosition: { x: 40, y: 90 },
+  qrCodePosition: { x: 40, y: 160 },
+  venueNamePosition: { x: 150, y: 380 }, // Adjusted for bottom center
+  logoPosition: { x: 260, y: 10 }, // Top-right corner
+  // Initial sizes
+  tableNumberSize: 48, // Font size in pixels
+  actionTextSize: 30, // Font size in pixels
+  qrCodeSize: 130, // Width/height in pixels
+  venueNameSize: 20, // Font size in pixels
+  logoSize: { width: 31, height: 31 } // Width/height in pixels
 };
 
 const Design = () => {

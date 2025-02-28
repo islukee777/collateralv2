@@ -1,5 +1,10 @@
 import React from "react";
+import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import { ResizableBox } from "react-resizable";
 import { QRCodeSVG } from "qrcode.react";
+
+// Include react-resizable styles (you may need to create a CSS file for this)
+import "react-resizable/css/styles.css";
 
 interface CollateralSettings {
   backgroundColor: string;
@@ -35,13 +40,24 @@ interface CollateralSettings {
     actionText: number;
     venueName: number;
   };
+  tableNumberPosition: { x: number; y: number };
+  actionTextPosition: { x: number; y: number };
+  qrCodePosition: { x: number; y: number };
+  venueNamePosition: { x: number; y: number };
+  logoPosition: { x: number; y: number };
+  tableNumberSize: number;
+  actionTextSize: number;
+  qrCodeSize: number;
+  venueNameSize: number;
+  logoSize: { width: number; height: number };
 }
 
 interface CollateralPreviewProps {
   settings: CollateralSettings;
+  updateSettings: (updates: Partial<CollateralSettings>) => void;
 }
 
-const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
+const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps) => {
   console.log("Current font in preview:", settings.fontFamily);
 
   // Add the text styling to the existing styles
@@ -173,8 +189,58 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
     maxWidth: settings.shape === "rectangle" ? "300px" : "none",
     height: settings.shape === "circle" ? "400px" : "auto",
     margin: "0 auto",
-    boxShadow: "0 10px 20px rgba(120, 120, 120, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3)", // Even lighter shadow for contrast
+    boxShadow: "0 10px 20px rgba(100, 100, 100, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.3)",
     ...getPatternStyle(),
+  };
+
+  // Handle drag stop for updating position
+  const handleDragStop = (element: string, e: DraggableEvent, data: DraggableData) => {
+    const updates: Partial<CollateralSettings> = {};
+    switch (element) {
+      case "tableNumber":
+        updates.tableNumberPosition = { x: data.x, y: data.y };
+        break;
+      case "actionText":
+        updates.actionTextPosition = { x: data.x, y: data.y };
+        break;
+      case "qrCode":
+        updates.qrCodePosition = { x: data.x, y: data.y };
+        break;
+      case "venueName":
+        updates.venueNamePosition = { x: data.x, y: data.y };
+        break;
+      case "logo":
+        updates.logoPosition = { x: data.x, y: data.y };
+        break;
+    }
+    updateSettings(updates);
+  };
+
+  // Handle resize stop for updating size with correct event type
+  const handleResizeStop = (
+    element: string,
+    _event: React.MouseEvent | React.TouchEvent, // Correct event type
+    size: { width: number; height: number }
+  ) => {
+    const updates: Partial<CollateralSettings> = {};
+    switch (element) {
+      case "tableNumber":
+        updates.tableNumberSize = size.width / 2; // Approximate font size based on width
+        break;
+      case "actionText":
+        updates.actionTextSize = size.width / 4; // Approximate font size based on width
+        break;
+      case "qrCode":
+        updates.qrCodeSize = size.width;
+        break;
+      case "venueName":
+        updates.venueNameSize = size.width / 3; // Approximate font size based on width
+        break;
+      case "logo":
+        updates.logoSize = { width: size.width, height: size.height };
+        break;
+    }
+    updateSettings(updates);
   };
 
   const backgroundContainerStyle: React.CSSProperties = {};
@@ -194,145 +260,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
     backgroundContainerStyle.zIndex = 0;
   }
 
-  const fixedPositionStyles = {
-    tableNumber: {
-      position: "absolute",
-      fontSize: `${
-        settings.shape === "circle"
-          ? Math.max(36, settings.fontSize.tableNumber * 0.75)
-          : settings.fontSize.tableNumber
-      }px`,
-      ...getTextStyles(),
-      ...(settings.shape === "rectangle"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "25px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "20px", left: "20px" }
-              : { top: "40px", left: "50%", transform: "translateX(-50%)" }),
-          }
-        : settings.shape === "square"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "20px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "15px", left: "15px" }
-              : { top: "30px", left: "50%", transform: "translateX(-50%)" }),
-          }
-        : {
-            ...(settings.layout === "standard"
-              ? { top: "10%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }
-              : settings.layout === "compact"
-              ? { top: "5%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }
-              : { top: "10%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }),
-          }),
-    } as React.CSSProperties,
-
-    actionText: {
-      position: "absolute",
-      fontSize: `${
-        settings.shape === "circle" ? 35 :
-        settings.shape === "square" ? 33 :
-        25
-      }px`,
-      maxWidth: settings.shape === "rectangle" ? "300px" : settings.shape === "square" ? "300px" : "3000px",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      ...getTextStyles(),
-      ...(settings.shape === "rectangle"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "90px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "800px", left: "20px" }
-              : { top: "120px", left: "50%", transform: "translateX(-50%)", textAlign: "center" }),
-          }
-        : settings.shape === "square"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "100px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "70px", left: "15px" }
-              : { top: "100px", left: "50%", transform: "translateX(-50%)", textAlign: "center" }),
-          }
-        : {
-            ...(settings.layout === "standard"
-              ? { top: "25%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }
-              : settings.layout === "compact"
-              ? { top: "20%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }
-              : { top: "25%", left: "50%", transform: "translateX(-50%)", textAlign: "center" }),
-          }),
-    } as React.CSSProperties,
-
-    qrCode: {
-      position: "absolute",
-      ...(settings.shape === "rectangle"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "160px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "150px", left: "20px" }
-              : { top: "200px", left: "50%", transform: "translateX(-50%)" }),
-          }
-        : settings.shape === "square"
-        ? {
-            ...(settings.layout === "standard"
-              ? { top: "170px", left: "40px" }
-              : settings.layout === "compact"
-              ? { top: "140px", left: "15px" }
-              : { top: "180px", left: "50%", transform: "translateX(-50%)" }),
-          }
-        : {
-            ...(settings.layout === "standard"
-              ? { top: "50%", left: "50%", transform: "translateX(-50%)" }
-              : settings.layout === "compact"
-              ? { top: "35%", left: "50%", transform: "translateX(-50%)" }
-              : { top: "40%", left: "50%", transform: "translateX(-50%)" }),
-          }),
-    } as React.CSSProperties,
-
-    venueName: {
-      position: "absolute",
-      fontSize: `${
-        settings.shape === "circle"
-          ? Math.max(16, settings.fontSize.venueName * 0.8)
-          : settings.fontSize.venueName
-      }px`,
-      ...getTextStyles(),
-      ...(settings.shape === "rectangle"
-        ? {
-            bottom: "10px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-          }
-        : settings.shape === "square"
-        ? {
-            bottom: "15px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-          }
-        : {
-            bottom: "5%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-          }),
-    } as React.CSSProperties,
-
-    logo: {
-      position: "absolute",
-      height: settings.shape === "circle" ? "24px" : "31px",
-      width: "auto",
-      ...(settings.shape === "rectangle"
-        ? { top: "10px", right: "20px" }
-        : settings.shape === "square"
-        ? { top: "35px", right: "15px" }
-        : { top: "5%", right: "5%" }),
-    } as React.CSSProperties,
-  };
+  const containerBounds = settings.shape === "rectangle" ? { left: 0, top: 0, right: 300, bottom: 400 } : { left: 0, top: 0, right: 400, bottom: 400 };
 
   return (
     <div
@@ -353,37 +281,131 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
         }`}
         style={{ fontFamily: settings.fontFamily, position: "relative", zIndex: 1 }}
       >
-        {settings.logoUrl && (
-          <img
-            src={settings.logoUrl}
-            alt="Venue Logo"
-            className="absolute"
-            style={fixedPositionStyles.logo}
-          />
-        )}
-
         {/* Table Number */}
-        <div style={fixedPositionStyles.tableNumber}>{settings.tableNumber}</div>
+        <Draggable
+          position={settings.tableNumberPosition}
+          onStop={(e, data) => handleDragStop("tableNumber", e, data)}
+          bounds={containerBounds}
+        >
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+            <ResizableBox
+              width={settings.tableNumberSize * 2}
+              height={settings.tableNumberSize}
+              minConstraints={[50, 20]}
+              maxConstraints={[200, 80]}
+              onResizeStop={(e, data) => handleResizeStop("tableNumber", e, data)}
+            >
+              <div style={{ ...getTextStyles(), fontSize: `${settings.tableNumberSize}px` }}>
+                {settings.tableNumber}
+              </div>
+            </ResizableBox>
+          </div>
+        </Draggable>
 
         {/* Action Text */}
-        <div style={fixedPositionStyles.actionText}>{settings.actionText}</div>
+        <Draggable
+          position={settings.actionTextPosition}
+          onStop={(e, data) => handleDragStop("actionText", e, data)}
+          bounds={containerBounds}
+        >
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+            <ResizableBox
+              width={settings.actionTextSize * 4}
+              height={settings.actionTextSize}
+              minConstraints={[100, 20]}
+              maxConstraints={[300, 60]}
+              onResizeStop={(e, data) => handleResizeStop("actionText", e, data)}
+            >
+              <div
+                style={{
+                  ...getTextStyles(),
+                  fontSize: `${settings.actionTextSize}px`,
+                  maxWidth: settings.shape === "rectangle" ? "300px" : settings.shape === "square" ? "300px" : "3000px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {settings.actionText}
+              </div>
+            </ResizableBox>
+          </div>
+        </Draggable>
 
         {/* QR Code */}
-        <div style={fixedPositionStyles.qrCode}>
-          <div className="bg-white p-[10px] inline-block rounded-sm">
-            <QRCodeSVG
-              value={settings.qrValue}
-              size={settings.shape === "circle" ? 110 : 130}
-              fgColor="black"
-              bgColor="white"
-              level="H"
-              includeMargin={false}
-            />
+        <Draggable
+          position={settings.qrCodePosition}
+          onStop={(e, data) => handleDragStop("qrCode", e, data)}
+          bounds={containerBounds}
+        >
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+            <ResizableBox
+              width={settings.qrCodeSize}
+              height={settings.qrCodeSize}
+              minConstraints={[80, 80]}
+              maxConstraints={[200, 200]}
+              onResizeStop={(e, data) => handleResizeStop("qrCode", e, data)}
+            >
+              <div className="bg-white p-[10px] inline-block rounded-sm">
+                <QRCodeSVG
+                  value={settings.qrValue}
+                  size={settings.qrCodeSize - 20}
+                  fgColor="black"
+                  bgColor="white"
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+            </ResizableBox>
           </div>
-        </div>
+        </Draggable>
 
+        {/* Venue Name */}
         {settings.venueName && (
-          <div style={fixedPositionStyles.venueName}>{settings.venueName}</div>
+          <Draggable
+            position={settings.venueNamePosition}
+            onStop={(e, data) => handleDragStop("venueName", e, data)}
+            bounds={containerBounds}
+          >
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+              <ResizableBox
+                width={settings.venueNameSize * 3}
+                height={settings.venueNameSize}
+                minConstraints={[60, 20]}
+                maxConstraints={[200, 40]}
+                onResizeStop={(e, data) => handleResizeStop("venueName", e, data)}
+              >
+                <div style={{ ...getTextStyles(), fontSize: `${settings.venueNameSize}px`, textAlign: "center" }}>
+                  {settings.venueName}
+                </div>
+              </ResizableBox>
+            </div>
+          </Draggable>
+        )}
+
+        {/* Logo */}
+        {settings.logoUrl && (
+          <Draggable
+            position={settings.logoPosition}
+            onStop={(e, data) => handleDragStop("logo", e, data)}
+            bounds={containerBounds}
+          >
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+              <ResizableBox
+                width={settings.logoSize.width}
+                height={settings.logoSize.height}
+                minConstraints={[20, 20]}
+                maxConstraints={[100, 100]}
+                onResizeStop={(e, data) => handleResizeStop("logo", e, data)}
+              >
+                <img
+                  src={settings.logoUrl}
+                  alt="Venue Logo"
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </ResizableBox>
+            </div>
+          </Draggable>
         )}
       </div>
     </div>
