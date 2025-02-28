@@ -58,11 +58,30 @@ interface CollateralSettings {
     actionText: number;
     venueName: number;
   };
-  tableNumberPosition: { x: number; y: number };
-  actionTextPosition: { x: number; y: number };
-  qrCodePosition: { x: number; y: number };
-  venueNamePosition: { x: number; y: number };
-  logoPosition: { x: number; y: number };
+  // Shape-specific positions for Rectangle
+  rectanglePositions: {
+    tableNumberPosition: { x: number; y: number };
+    actionTextPosition: { x: number; y: number };
+    qrCodePosition: { x: number; y: number };
+    venueNamePosition: { x: number; y: number };
+    logoPosition: { x: number; y: number };
+  };
+  // Shape-specific positions for Square
+  squarePositions: {
+    tableNumberPosition: { x: number; y: number };
+    actionTextPosition: { x: number; y: number };
+    qrCodePosition: { x: number; y: number };
+    venueNamePosition: { x: number; y: number };
+    logoPosition: { x: number; y: number };
+  };
+  // Shape-specific positions for Circle
+  circlePositions: {
+    tableNumberPosition: { x: number; y: number };
+    actionTextPosition: { x: number; y: number };
+    qrCodePosition: { x: number; y: number };
+    venueNamePosition: { x: number; y: number };
+    logoPosition: { x: number; y: number };
+  };
   tableNumberSize: number;
   actionTextSize: number;
   qrCodeSize: number;
@@ -105,15 +124,31 @@ const defaultSettings: CollateralSettings = {
     actionText: 30,
     venueName: 20,
   },
-  tableNumberPosition: { x: 40, y: 25 },
-  actionTextPosition: { x: 40, y: 90 },
-  qrCodePosition: { x: 40, y: 160 },
-  venueNamePosition: { x: 150, y: 370 }, // Adjusted for element height
-  logoPosition: { x: 260, y: 10 },
+  rectanglePositions: {
+    tableNumberPosition: { x: 20, y: 20 },
+    actionTextPosition: { x: 20, y: 90 },
+    qrCodePosition: { x: 20, y: 160 },
+    venueNamePosition: { x: 100, y: 300 },
+    logoPosition: { x: 80, y: 20 },
+  },
+  squarePositions: {
+    tableNumberPosition: { x: 40, y: 20 },
+    actionTextPosition: { x: 40, y: 100 },
+    qrCodePosition: { x: 40, y: 170 },
+    venueNamePosition: { x: 200, y: 365 }, // Center of 400px width, near bottom
+    logoPosition: { x: 365, y: 35 },
+  },
+  circlePositions: {
+    tableNumberPosition: { x: 200, y: 40 }, // Center of 400px width, 10% from top
+    actionTextPosition: { x: 200, y: 100 }, // 25% from top
+    qrCodePosition: { x: 200, y: 200 }, // 50% from top
+    venueNamePosition: { x: 200, y: 360 }, // 95% from top, adjusted for height
+    logoPosition: { x: 356, y: 20 }, // 95% from left, 5% from top
+  },
   tableNumberSize: 48,
   actionTextSize: 30,
   qrCodeSize: 130,
-  venueNameSize: 20,
+  venueNameSize: 18,
   logoSize: { width: 31, height: 31 },
 };
 
