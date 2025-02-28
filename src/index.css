@@ -145,3 +145,37 @@
   border-radius: inherit;
   box-shadow: 0 12px 25px rgba(50, 50, 50, 0.5); /* Lighter shadow for visibility */
 }
+.react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQgTCA2IDQgTCA2IDYgWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L3N2Zz4=') no-repeat center center;
+  cursor: se-resize;
+  z-index: 10;
+}
+
+/* Ensure the parent doesn't clip the handle */
+.react-resizable {
+  position: relative;
+  overflow: visible !important;
+}
+.react-resizable-handle-se {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQgTCA2IDQgTCA2IDYgWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L3N2Zz4=') no-repeat center center;
+  background-color: rgba(0, 0, 255, 0.5); /* Blue handle for visibility */
+  border-radius: 4px;
+  cursor: se-resize;
+  z-index: 11; /* Ensure handle is above other elements */
+}
+
+/* Prevent the draggable parent from capturing resize events */
+.resizable-container {
+  position: relative;
+  display: inline-block;
+}

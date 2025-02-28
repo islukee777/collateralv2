@@ -68,15 +68,20 @@ interface CollateralSettings {
   qrCodeSize: number;
   venueNameSize: number;
   logoSize: { width: number; height: number };
+  tableNumberDragged: boolean;
+  actionTextDragged: boolean;
+  qrCodeDragged: boolean;
+  venueNameDragged: boolean;
+  logoDragged: boolean;
 }
 
 // Default collateral settings
 const defaultSettings: CollateralSettings = {
-  backgroundColor: "#D8465E",
-  textColor: "#FFFFFF",
+  backgroundColor: "#CEEBF7",
+  textColor: "#1F4658",
   tableNumber: "100",
-  actionText: "Scan, Order & Pay",
-  venueName: "",
+  actionText: "Scan, Order, Pay",
+  venueName: "Your Venue",
   qrValue: "https://meand.u/demo",
   logoUrl: null,
   backgroundImageUrl: null,
@@ -89,7 +94,7 @@ const defaultSettings: CollateralSettings = {
     bold: false,
     underline: false,
     highlight: false,
-    highlightColor: "#c8ff00"
+    highlightColor: "#c8ff00",
   },
   icons: {
     coffee: false,
@@ -97,24 +102,29 @@ const defaultSettings: CollateralSettings = {
     flower: false,
     wineglass: false,
     plate: false,
-    cocktail: false
+    cocktail: false,
   },
-  cornerRadius: 20,
+  cornerRadius: 18,
   fontSize: {
     tableNumber: 48,
     actionText: 30,
-    venueName: 20
+    venueName: 20,
   },
   tableNumberPosition: { x: 40, y: 25 },
   actionTextPosition: { x: 40, y: 90 },
   qrCodePosition: { x: 40, y: 160 },
-  venueNamePosition: { x: 150, y: 380 },
+  venueNamePosition: { x: 150, y: 370 }, // Adjusted to better center at bottom
   logoPosition: { x: 260, y: 10 },
   tableNumberSize: 48,
   actionTextSize: 30,
   qrCodeSize: 130,
   venueNameSize: 20,
-  logoSize: { width: 31, height: 31 }
+  logoSize: { width: 31, height: 31 },
+  tableNumberDragged: false,
+  actionTextDragged: false,
+  qrCodeDragged: false,
+  venueNameDragged: false,
+  logoDragged: false,
 };
 
 const Design = () => {
@@ -202,7 +212,7 @@ const Design = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Left Side - Collateral Preview */}
           <div className="flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md mx-auto bg-white/100 rounded-3xl p-8 premium-shadow overflow-visible">
+            <div className="w-full max-w-md mx-auto bg-white/80 rounded-3xl p-8 premium-shadow overflow-visible">
               <CollateralPreview settings={settings} updateSettings={updateSettings} />
             </div>
           </div>

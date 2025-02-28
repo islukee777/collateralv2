@@ -3,7 +3,7 @@ import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { ResizableBox } from "react-resizable";
 import { QRCodeSVG } from "qrcode.react";
 
-// Include react-resizable styles (you may need to create a CSS file for this)
+// Include react-resizable styles
 import "react-resizable/css/styles.css";
 
 interface CollateralSettings {
@@ -50,6 +50,11 @@ interface CollateralSettings {
   qrCodeSize: number;
   venueNameSize: number;
   logoSize: { width: number; height: number };
+  tableNumberDragged: boolean;
+  actionTextDragged: boolean;
+  qrCodeDragged: boolean;
+  venueNameDragged: boolean;
+  logoDragged: boolean;
 }
 
 interface CollateralPreviewProps {
@@ -180,17 +185,92 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     }
   };
 
+  // Define the container dimensions based on shape
+  const containerWidth = settings.shape === "rectangle" ? 300 : 400; // 300px for Rectangle, 400px for Square/Circle
+  const containerHeight = settings.shape === "rectangle" ? 400 : 400; // 400px height for all shapes
+
   const containerStyle: React.CSSProperties = {
     backgroundColor: settings.backgroundColor,
     color: settings.textColor,
     borderRadius: settings.shape === "circle" ? "50%" : "20px",
     position: "relative",
-    width: settings.shape === "square" || settings.shape === "circle" ? "400px" : "auto",
-    maxWidth: settings.shape === "rectangle" ? "300px" : "none",
-    height: settings.shape === "circle" ? "400px" : "auto",
+    width: `${containerWidth}px`,
+    height: `${containerHeight}px`,
     margin: "0 auto",
     boxShadow: "0 10px 20px rgba(100, 100, 100, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.3)",
     ...getPatternStyle(),
+  };
+
+  // Adjust initial positions based on shape (only if not dragged)
+  const adjustPositionForShape = (originalPosition: { x: number; y: number }, element: string) => {
+    const hasBeenDragged = {
+      tableNumber: settings.tableNumberDragged,
+      actionText: settings.actionTextDragged,
+      qrCode: settings.qrCodeDragged,
+      venueName: settings.venueNameDragged,
+      logo: settings.logoDragged
+    }[element];
+
+    if (hasBeenDragged) {
+      return originalPosition;
+    }
+
+    if (settings.shape === "rectangle") {
+      return originalPosition;
+    }
+
+    const containerSize = settings.shape === "square" ? 400 : 400;
+    const centerX = containerSize / 2;
+    const adjustedPosition = { ...originalPosition };
+
+    if (settings.shape === "square") {
+      switch (element) {
+        case "tableNumber":
+          adjustedPosition.x = 40;
+          adjustedPosition.y = 20;
+          break;
+        case "actionText":
+          adjustedPosition.x = 40;
+          adjustedPosition.y = 100;
+          break;
+        case "qrCode":
+          adjustedPosition.x = 40;
+          adjustedPosition.y = 170;
+          break;
+        case "venueName":
+          adjustedPosition.x = centerX;
+          adjustedPosition.y = containerSize - 15;
+          break;
+        case "logo":
+          adjustedPosition.x = containerSize - 35;
+          adjustedPosition.y = 35;
+          break;
+      }
+    } else if (settings.shape === "circle") {
+      switch (element) {
+        case "tableNumber":
+          adjustedPosition.x = centerX;
+          adjustedPosition.y = containerSize * 0.1;
+          break;
+        case "actionText":
+          adjustedPosition.x = centerX;
+          adjustedPosition.y = containerSize * 0.25;
+          break;
+        case "qrCode":
+          adjustedPosition.x = centerX;
+          adjustedPosition.y = containerSize * 0.5;
+          break;
+        case "venueName":
+          adjustedPosition.x = centerX;
+          adjustedPosition.y = containerSize * 0.95;
+          break;
+        case "logo":
+          adjustedPosition.x = containerSize * 0.95;
+          adjustedPosition.y = containerSize * 0.05;
+          break;
+      }
+    }
+    return adjustedPosition;
   };
 
   // Handle drag stop for updating position
@@ -199,48 +279,58 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     switch (element) {
       case "tableNumber":
         updates.tableNumberPosition = { x: data.x, y: data.y };
+        updates.tableNumberDragged = true;
         break;
       case "actionText":
         updates.actionTextPosition = { x: data.x, y: data.y };
+        updates.actionTextDragged = true;
         break;
       case "qrCode":
         updates.qrCodePosition = { x: data.x, y: data.y };
+        updates.qrCodeDragged = true;
         break;
       case "venueName":
         updates.venueNamePosition = { x: data.x, y: data.y };
+        updates.venueNameDragged = true;
         break;
       case "logo":
         updates.logoPosition = { x: data.x, y: data.y };
+        updates.logoDragged = true;
         break;
     }
     updateSettings(updates);
   };
 
-  // Handle resize stop for updating size with correct event type
+  // Handle resize stop for updating size
   const handleResizeStop = (
     element: string,
-    _event: React.MouseEvent | React.TouchEvent, // Correct event type
+    _event: React.MouseEvent | React.TouchEvent,
     size: { width: number; height: number }
   ) => {
     const updates: Partial<CollateralSettings> = {};
     switch (element) {
       case "tableNumber":
-        updates.tableNumberSize = size.width / 2; // Approximate font size based on width
+        updates.tableNumberSize = size.width / 2;
         break;
       case "actionText":
-        updates.actionTextSize = size.width / 4; // Approximate font size based on width
+        updates.actionTextSize = size.width / 4;
         break;
       case "qrCode":
         updates.qrCodeSize = size.width;
         break;
       case "venueName":
-        updates.venueNameSize = size.width / 3; // Approximate font size based on width
+        updates.venueNameSize = size.width / 3;
         break;
       case "logo":
         updates.logoSize = { width: size.width, height: size.height };
         break;
     }
     updateSettings(updates);
+  };
+
+  // Stop drag event propagation when resizing
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   const backgroundContainerStyle: React.CSSProperties = {};
@@ -260,11 +350,19 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
     backgroundContainerStyle.zIndex = 0;
   }
 
-  const containerBounds = settings.shape === "rectangle" ? { left: 0, top: 0, right: 300, bottom: 400 } : { left: 0, top: 0, right: 400, bottom: 400 };
+  // Calculate bounds for each element to prevent dragging outside the container
+  const getElementBounds = (elementWidth: number, elementHeight: number) => {
+    return {
+      left: 0,
+      top: 0,
+      right: containerWidth - elementWidth,
+      bottom: containerHeight - elementHeight,
+    };
+  };
 
   return (
     <div
-      className="rounded-3xl w-full max-w-md mx-auto relative acrylic-thickness"
+      className="rounded-3xl w-full max-w-md mx-auto relative acrylic-thickness overflow-visible"
       style={containerStyle}
     >
       {/* Background image with opacity */}
@@ -272,28 +370,24 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
 
       {/* Content with exact positioning */}
       <div
-        className={`p-4 ${
-          settings.shape === "rectangle"
-            ? "aspect-[3/4]"
-            : settings.shape === "square"
-            ? "aspect-square"
-            : "aspect-square"
-        }`}
-        style={{ fontFamily: settings.fontFamily, position: "relative", zIndex: 1 }}
+        className={`p-4 overflow-visible`}
+        style={{ fontFamily: settings.fontFamily, position: "relative", zIndex: 1, width: `${containerWidth}px`, height: `${containerHeight}px` }}
       >
         {/* Table Number */}
         <Draggable
-          position={settings.tableNumberPosition}
+          position={adjustPositionForShape(settings.tableNumberPosition, "tableNumber")}
           onStop={(e, data) => handleDragStop("tableNumber", e, data)}
-          bounds={containerBounds}
+          bounds={getElementBounds(settings.tableNumberSize * 2, settings.tableNumberSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
             <ResizableBox
               width={settings.tableNumberSize * 2}
               height={settings.tableNumberSize}
               minConstraints={[50, 20]}
               maxConstraints={[200, 80]}
               onResizeStop={(e, data) => handleResizeStop("tableNumber", e, data)}
+              resizeHandles={["se"]}
+              onMouseDown={stopPropagation}
             >
               <div style={{ ...getTextStyles(), fontSize: `${settings.tableNumberSize}px` }}>
                 {settings.tableNumber}
@@ -304,17 +398,19 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
 
         {/* Action Text */}
         <Draggable
-          position={settings.actionTextPosition}
+          position={adjustPositionForShape(settings.actionTextPosition, "actionText")}
           onStop={(e, data) => handleDragStop("actionText", e, data)}
-          bounds={containerBounds}
+          bounds={getElementBounds(settings.actionTextSize * 4, settings.actionTextSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
             <ResizableBox
               width={settings.actionTextSize * 4}
               height={settings.actionTextSize}
               minConstraints={[100, 20]}
               maxConstraints={[300, 60]}
               onResizeStop={(e, data) => handleResizeStop("actionText", e, data)}
+              resizeHandles={["se"]}
+              onMouseDown={stopPropagation}
             >
               <div
                 style={{
@@ -334,17 +430,19 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
 
         {/* QR Code */}
         <Draggable
-          position={settings.qrCodePosition}
+          position={adjustPositionForShape(settings.qrCodePosition, "qrCode")}
           onStop={(e, data) => handleDragStop("qrCode", e, data)}
-          bounds={containerBounds}
+          bounds={getElementBounds(settings.qrCodeSize, settings.qrCodeSize)}
         >
-          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+          <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
             <ResizableBox
               width={settings.qrCodeSize}
               height={settings.qrCodeSize}
               minConstraints={[80, 80]}
               maxConstraints={[200, 200]}
               onResizeStop={(e, data) => handleResizeStop("qrCode", e, data)}
+              resizeHandles={["se"]}
+              onMouseDown={stopPropagation}
             >
               <div className="bg-white p-[10px] inline-block rounded-sm">
                 <QRCodeSVG
@@ -363,17 +461,19 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
         {/* Venue Name */}
         {settings.venueName && (
           <Draggable
-            position={settings.venueNamePosition}
+            position={adjustPositionForShape(settings.venueNamePosition, "venueName")}
             onStop={(e, data) => handleDragStop("venueName", e, data)}
-            bounds={containerBounds}
+            bounds={getElementBounds(settings.venueNameSize * 3, settings.venueNameSize)}
           >
-            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
               <ResizableBox
                 width={settings.venueNameSize * 3}
                 height={settings.venueNameSize}
                 minConstraints={[60, 20]}
                 maxConstraints={[200, 40]}
                 onResizeStop={(e, data) => handleResizeStop("venueName", e, data)}
+                resizeHandles={["se"]}
+                onMouseDown={stopPropagation}
               >
                 <div style={{ ...getTextStyles(), fontSize: `${settings.venueNameSize}px`, textAlign: "center" }}>
                   {settings.venueName}
@@ -386,17 +486,19 @@ const CollateralPreview = ({ settings, updateSettings }: CollateralPreviewProps)
         {/* Logo */}
         {settings.logoUrl && (
           <Draggable
-            position={settings.logoPosition}
+            position={adjustPositionForShape(settings.logoPosition, "logo")}
             onStop={(e, data) => handleDragStop("logo", e, data)}
-            bounds={containerBounds}
+            bounds={getElementBounds(settings.logoSize.width, settings.logoSize.height)}
           >
-            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500">
+            <div className="absolute cursor-move hover:outline hover:outline-2 hover:outline-blue-500 resizable-container">
               <ResizableBox
                 width={settings.logoSize.width}
                 height={settings.logoSize.height}
                 minConstraints={[20, 20]}
                 maxConstraints={[100, 100]}
                 onResizeStop={(e, data) => handleResizeStop("logo", e, data)}
+                resizeHandles={["se"]}
+                onMouseDown={stopPropagation}
               >
                 <img
                   src={settings.logoUrl}
