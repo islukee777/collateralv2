@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +35,7 @@ interface CollateralSettings {
   backgroundImageUrl: string | null;
   backgroundOpacity: number;
   layout: string;
+  shape: "rectangle" | "square" | "circle"; // Added shape property
   pattern: string;
   fontFamily: string;
   textStyle: {
@@ -72,6 +72,7 @@ const defaultSettings: CollateralSettings = {
   backgroundImageUrl: null,
   backgroundOpacity: 1.0,
   layout: "standard", // standard, compact, centered
+  shape: "rectangle", // Default shape set to rectangle
   pattern: "waves", // Set waves pattern to match example
   fontFamily: "'Poppins', sans-serif", // Set Poppins as default font
   textStyle: {
