@@ -156,47 +156,6 @@
   display: block;
 }
 
-/* Side handles (north, east, south, west) - small rectangles/lines */
-.resizable-active .react-resizable-handle-n,
-.resizable-active .react-resizable-handle-s {
-  width: 12px;
-  height: 4px;
-  background-color: #007bff; /* Blue color */
-  border-radius: 2px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  cursor: ns-resize;
-}
-
-.resizable-active .react-resizable-handle-n {
-  top: -2px;
-}
-
-.resizable-active .react-resizable-handle-s {
-  bottom: -2px;
-}
-
-.resizable-active .react-resizable-handle-e,
-.resizable-active .react-resizable-handle-w {
-  width: 4px;
-  height: 12px;
-  background-color: #007bff;
-  border-radius: 2px;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: ew-resize;
-}
-
-.resizable-active .react-resizable-handle-e {
-  right: -2px;
-}
-
-.resizable-active .react-resizable-handle-w {
-  left: -2px;
-}
-
 /* Corner handles (northeast, southeast, southwest, northwest) - small circles */
 .resizable-active .react-resizable-handle-ne,
 .resizable-active .react-resizable-handle-se,
@@ -204,32 +163,32 @@
 .resizable-active .react-resizable-handle-nw {
   width: 10px;
   height: 10px;
-  background-color: #007bff;
+  background-color: black;
   border-radius: 50%;
   position: absolute;
 }
 
 .resizable-active .react-resizable-handle-ne {
-  top: -5px;
-  right: -5px;
+  top: -1px; /* Center dot on the corner of the border (padding 2px + border 2px - half of dot 5px) */
+  right: -1px;
   cursor: ne-resize;
 }
 
 .resizable-active .react-resizable-handle-se {
-  bottom: -5px;
-  right: -5px;
+  bottom: -1px;
+  right: -1px;
   cursor: se-resize;
 }
 
 .resizable-active .react-resizable-handle-sw {
-  bottom: -5px;
-  left: -5px;
+  bottom: -1px;
+  left: -1px;
   cursor: sw-resize;
 }
 
 .resizable-active .react-resizable-handle-nw {
-  top: -5px;
-  left: -5px;
+  top: -1px;
+  left: -1px;
   cursor: nw-resize;
 }
 
@@ -251,7 +210,21 @@
   width: 100%; /* Ensure the drag handle stretches to the full width of the content */
   height: 100%; /* Ensure the drag handle stretches to the full height of the content */
   display: block; /* Ensure the drag handle is a block element to take full width */
-  padding: 2px; /* Reduced padding to minimize extra space */
+  padding: 2px; /* Side padding */
+  padding-top: 4px; /* Custom top padding */
+  padding-bottom: 4px; /* Custom bottom padding */
+}
+
+/* Active state (when selected) */
+.drag-handle.active {
+  border: 2px solid #1E90FF; /* Custom color (dodgerblue) */
+  border-radius: 8px; /* Custom border radius */
+}
+
+/* Hover state */
+.drag-handle:hover:not(.active) {
+  border: 2px solid #1E90FF; /* Same color as active state */
+  border-radius: 8px;
 }
 
 /* Smooth dragging and resizing */

@@ -1,7 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { ResizableBox } from "react-resizable";
 import { QRCodeSVG } from "qrcode.react";
+import { Input } from "@/components/ui/input";
 
 // Include react-resizable styles
 import "react-resizable/css/styles.css";
@@ -20,6 +21,9 @@ interface CollateralSettings {
   shape: "rectangle" | "square" | "circle";
   pattern: string;
   fontFamily: string;
+  tableNumberFont: string;
+  actionTextFont: string;
+  venueNameFont: string;
   textStyle: {
     bold: boolean;
     underline: boolean;
@@ -71,6 +75,9 @@ interface CollateralSettings {
   qrCodeWidth: number;
   venueNameWidth: number;
   logoWidth: number;
+  tableNumberAlignment: "left" | "center" | "right";
+  actionTextAlignment: "left" | "center" | "right";
+  venueNameAlignment: "left" | "center" | "right";
 }
 
 interface CollateralPreviewProps {
@@ -78,20 +85,79 @@ interface CollateralPreviewProps {
   updateSettings: (updates: Partial<CollateralSettings>) => void;
 }
 
+interface AlignmentGuide {
+  type: "horizontal" | "vertical";
+  position: number;
+  start: number;
+  end: number;
+}
+
 const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPreviewProps) => {
-  console.log("Current font in preview:", settings.fontFamily);
+  console.log("Current fonts in preview:", {
+    tableNumberFont: settings.tableNumberFont,
+    actionTextFont: settings.actionTextFont,
+    venueNameFont: settings.venueNameFont,
+  });
+  console.log("Current alignments in preview:", {
+    tableNumberAlignment: settings.tableNumberAlignment,
+    actionTextAlignment: settings.actionTextAlignment,
+    venueNameAlignment: settings.venueNameAlignment,
+  });
 
   // State to track the active component
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
+  // State to track which component is being edited
+  const [editingComponent, setEditingComponent] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  // State to track component sizes for drag bounds
+  const [componentSizes, setComponentSizes] = useState({
+    tableNumber: { width: settings.tableNumberWidth, height: settings.tableNumberSize },
+    actionText: { width: settings.actionTextWidth, height: settings.actionTextSize },
+    qrCode: { width: settings.qrCodeWidth, height: settings.qrCodeSize },
+    venueName: { width: settings.venueNameWidth, height: settings.venueNameSize },
+    logo: { width: settings.logoWidth, height: settings.logoWidth },
+  });
+  // State to track alignment guides
+  const [alignmentGuides, setAlignmentGuides] = useState<AlignmentGuide[]>([]);
 
-  // Handle click on a component to set it as active
-  const handleComponentClick = (component: string) => {
-    setActiveComponent(component);
+  // Handle click on a component to toggle its selection
+  const handleComponentClick = (component: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from bubbling up to the container
+    setActiveComponent((prev) => (prev === component ? null : component));
+  };
+
+  // Handle double-click to start editing
+  const handleDoubleClick = (component: string, currentText: string) => {
+    try {
+      setEditingComponent(component);
+      setEditText(currentText);
+    } catch (error) {
+      console.error("Error in handleDoubleClick:", error);
+    }
+  };
+
+  // Handle text editing change
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditText(e.target.value);
+  };
+
+  // Handle saving the edited text
+  const handleTextSave = (component: string) => {
+    if (component === "tableNumber") {
+      updateSettings({ tableNumber: editText });
+    } else if (component === "actionText") {
+      updateSettings({ actionText: editText });
+    } else if (component === "venueName") {
+      updateSettings({ venueName: editText });
+    }
+    setEditingComponent(null);
   };
 
   // Handle click outside to deselect the active component
   const handleOutsideClick = () => {
     setActiveComponent(null);
+    setEditingComponent(null);
+    setAlignmentGuides([]);
   };
 
   // Add the text styling to the existing styles
@@ -106,6 +172,194 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
       display: "inline-block",
     };
   }, [settings.textStyle]);
+
+  // Memoized drag stop handler
+  const handleDragStop = useCallback(
+    (element: string, e: DraggableEvent, data: DraggableData) => {
+      const updates: Partial<CollateralSettings> = {};
+      const shapeKey = settings.shape === "rectangle" ? "rectanglePositions" : settings.shape === "square" ? "squarePositions" : "circlePositions";
+      updates[shapeKey] = { ...settings[shapeKey] };
+
+      switch (element) {
+        case "tableNumber":
+          updates[shapeKey]!.tableNumberPosition = { x: data.x, y: data.y };
+          break;
+        case "actionText":
+          updates[shapeKey]!.actionTextPosition = { x: data.x, y: data.y };
+          break;
+        case "qrCode":
+          updates[shapeKey]!.qrCodePosition = { x: data.x, y: data.y };
+          break;
+        case "venueName":
+          updates[shapeKey]!.venueNamePosition = { x: data.x, y: data.y };
+          break;
+        case "logo":
+          updates[shapeKey]!.logoPosition = { x: data.x, y: data.y };
+          break;
+      }
+      updateSettings(updates);
+      setAlignmentGuides([]); // Clear guides after drag ends
+    },
+    [settings, updateSettings]
+  );
+
+  // Memoized resize stop handler
+  const handleResizeStop = useCallback(
+    (element: string, e: React.MouseEvent | React.TouchEvent, data: { size: { width: number; height: number } }) => {
+      console.log(`${element} Resize:`, data.size); // Debug log
+      const updates: Partial<CollateralSettings> = {};
+      switch (element) {
+        case "tableNumber":
+          updates.tableNumberWidth = data.size.width;
+          setComponentSizes((prev) => ({
+            ...prev,
+            tableNumber: { ...prev.tableNumber, width: data.size.width },
+          }));
+          break;
+        case "actionText":
+          updates.actionTextWidth = data.size.width;
+          setComponentSizes((prev) => ({
+            ...prev,
+            actionText: { ...prev.actionText, width: data.size.width },
+          }));
+          break;
+        case "qrCode":
+          updates.qrCodeWidth = data.size.width;
+          updates.qrCodeSize = data.size.width; // Keep QR code square
+          setComponentSizes((prev) => ({
+            ...prev,
+            qrCode: { width: data.size.width, height: data.size.width },
+          }));
+          break;
+        case "venueName":
+          updates.venueNameWidth = data.size.width;
+          setComponentSizes((prev) => ({
+            ...prev,
+            venueName: { ...prev.venueName, width: data.size.width },
+          }));
+          break;
+        case "logo":
+          updates.logoWidth = data.size.width;
+          updates.logoSize = { width: data.size.width, height: data.size.width }; // Keep logo square
+          setComponentSizes((prev) => ({
+            ...prev,
+            logo: { width: data.size.width, height: data.size.width },
+          }));
+          break;
+      }
+      updateSettings(updates);
+    },
+    [updateSettings]
+  );
+
+  // Calculate max constraints for ResizableBox
+  const getMaxConstraints = (position: { x: number; y: number }, minWidth: number, minHeight: number) => {
+    const maxWidth = containerWidth - position.x; // Cannot expand beyond right edge
+    const maxHeight = containerHeight - position.y; // Cannot expand beyond bottom edge
+    return [Math.max(minWidth, maxWidth), Math.max(minHeight, maxHeight)];
+  };
+
+  // Calculate bounds for each element to prevent dragging outside the container
+  const getElementBounds = (element: string) => {
+    const { width, height } = componentSizes[element as keyof typeof componentSizes];
+    return {
+      left: 0, // Cannot drag beyond left edge
+      top: 0,  // Cannot drag beyond top edge
+      right: containerWidth - width, // Cannot drag beyond right edge
+      bottom: containerHeight - height, // Cannot drag beyond bottom edge
+    };
+  };
+
+  // Calculate alignment guides during drag
+  const handleDrag = (draggingElement: string, e: DraggableEvent, data: DraggableData) => {
+    const guides: AlignmentGuide[] = [];
+    const draggingBounds = {
+      left: data.x,
+      right: data.x + componentSizes[draggingElement as keyof typeof componentSizes].width,
+      top: data.y,
+      bottom: data.y + componentSizes[draggingElement as keyof typeof componentSizes].height,
+      centerX: data.x + componentSizes[draggingElement as keyof typeof componentSizes].width / 2,
+      centerY: data.y + componentSizes[draggingElement as keyof typeof componentSizes].height / 2,
+    };
+
+    const elements = ["tableNumber", "actionText", "qrCode", "venueName", "logo"].filter(el => el !== draggingElement);
+
+    elements.forEach((element) => {
+      const pos = currentPositions[element + "Position" as keyof typeof currentPositions];
+      const size = componentSizes[element as keyof typeof componentSizes];
+      if (!pos || !size) return;
+
+      const bounds = {
+        left: pos.x,
+        right: pos.x + size.width,
+        top: pos.y,
+        bottom: pos.y + size.height,
+        centerX: pos.x + size.width / 2,
+        centerY: pos.y + size.height / 2,
+      };
+
+      // Horizontal alignment (top, center, bottom)
+      const threshold = 5; // Pixels within which to snap
+      if (Math.abs(draggingBounds.top - bounds.top) < threshold) {
+        guides.push({
+          type: "horizontal",
+          position: bounds.top,
+          start: Math.min(draggingBounds.left, bounds.left),
+          end: Math.max(draggingBounds.right, bounds.right),
+        });
+        data.y = bounds.top; // Snap to alignment
+      }
+      if (Math.abs(draggingBounds.bottom - bounds.bottom) < threshold) {
+        guides.push({
+          type: "horizontal",
+          position: bounds.bottom,
+          start: Math.min(draggingBounds.left, bounds.left),
+          end: Math.max(draggingBounds.right, bounds.right),
+        });
+        data.y = bounds.bottom - componentSizes[draggingElement as keyof typeof componentSizes].height;
+      }
+      if (Math.abs(draggingBounds.centerY - bounds.centerY) < threshold) {
+        guides.push({
+          type: "horizontal",
+          position: bounds.centerY,
+          start: Math.min(draggingBounds.left, bounds.left),
+          end: Math.max(draggingBounds.right, bounds.right),
+        });
+        data.y = bounds.centerY - componentSizes[draggingElement as keyof typeof componentSizes].height / 2;
+      }
+
+      // Vertical alignment (left, center, right)
+      if (Math.abs(draggingBounds.left - bounds.left) < threshold) {
+        guides.push({
+          type: "vertical",
+          position: bounds.left,
+          start: Math.min(draggingBounds.top, bounds.top),
+          end: Math.max(draggingBounds.bottom, bounds.bottom),
+        });
+        data.x = bounds.left;
+      }
+      if (Math.abs(draggingBounds.right - bounds.right) < threshold) {
+        guides.push({
+          type: "vertical",
+          position: bounds.right,
+          start: Math.min(draggingBounds.top, bounds.top),
+          end: Math.max(draggingBounds.bottom, bounds.bottom),
+        });
+        data.x = bounds.right - componentSizes[draggingElement as keyof typeof componentSizes].width;
+      }
+      if (Math.abs(draggingBounds.centerX - bounds.centerX) < threshold) {
+        guides.push({
+          type: "vertical",
+          position: bounds.centerX,
+          start: Math.min(draggingBounds.top, bounds.top),
+          end: Math.max(draggingBounds.bottom, bounds.bottom),
+        });
+        data.x = bounds.centerX - componentSizes[draggingElement as keyof typeof componentSizes].width / 2;
+      }
+    });
+
+    setAlignmentGuides(guides);
+  };
 
   // Patterns (unchanged)
   const getPatternStyle = useCallback(() => {
@@ -237,74 +491,6 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
     ? settings.squarePositions
     : settings.circlePositions;
 
-  // Memoized drag stop handler
-  const handleDragStop = useCallback(
-    (element: string, e: DraggableEvent, data: DraggableData) => {
-      const updates: Partial<CollateralSettings> = {};
-      const shapeKey = settings.shape === "rectangle" ? "rectanglePositions" : settings.shape === "square" ? "squarePositions" : "circlePositions";
-      updates[shapeKey] = { ...settings[shapeKey] };
-
-      switch (element) {
-        case "tableNumber":
-          updates[shapeKey]!.tableNumberPosition = { x: data.x, y: data.y };
-          break;
-        case "actionText":
-          updates[shapeKey]!.actionTextPosition = { x: data.x, y: data.y };
-          break;
-        case "qrCode":
-          updates[shapeKey]!.qrCodePosition = { x: data.x, y: data.y };
-          break;
-        case "venueName":
-          updates[shapeKey]!.venueNamePosition = { x: data.x, y: data.y };
-          break;
-        case "logo":
-          updates[shapeKey]!.logoPosition = { x: data.x, y: data.y };
-          break;
-      }
-      updateSettings(updates);
-    },
-    [settings, updateSettings]
-  );
-
-  // Memoized resize stop handler
-  const handleResizeStop = useCallback(
-    (element: string, e: React.MouseEvent | React.TouchEvent, data: { size: { width: number; height: number } }) => {
-      console.log(`${element} Resize:`, data.size); // Debug log
-      const updates: Partial<CollateralSettings> = {};
-      switch (element) {
-        case "tableNumber":
-          updates.tableNumberWidth = data.size.width;
-          break;
-        case "actionText":
-          updates.actionTextWidth = data.size.width;
-          break;
-        case "qrCode":
-          updates.qrCodeWidth = data.size.width;
-          updates.qrCodeSize = data.size.width; // Keep QR code square
-          break;
-        case "venueName":
-          updates.venueNameWidth = data.size.width;
-          break;
-        case "logo":
-          updates.logoWidth = data.size.width;
-          updates.logoSize = { width: data.size.width, height: data.size.width }; // Keep logo square
-          break;
-      }
-      updateSettings(updates);
-    },
-    [updateSettings]
-  );
-
-  // Calculate bounds for each element to prevent dragging outside the container
-  const getElementBounds = (elementWidth: number, elementHeight: number) => {
-    return {
-      left: 0,
-      top: 0,
-      right: containerWidth - elementWidth,
-      bottom: containerHeight - elementHeight,
-    };
-  };
-
   const backgroundContainerStyle: React.CSSProperties = {
     ...(settings.backgroundImageUrl && {
       backgroundImage: `url(${settings.backgroundImageUrl})`,
@@ -331,34 +517,82 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
       {/* Background image with opacity */}
       {settings.backgroundImageUrl && <div style={backgroundContainerStyle}></div>}
 
+      {/* Alignment Guides */}
+      {alignmentGuides.map((guide, index) => (
+        <div
+          key={index}
+          style={{
+            position: "absolute",
+            zIndex: 10,
+            backgroundColor: "black",
+            ...(guide.type === "horizontal"
+              ? {
+                  top: guide.position,
+                  left: guide.start,
+                  width: guide.end - guide.start,
+                  height: "2px",
+                }
+              : {
+                  top: guide.start,
+                  left: guide.position,
+                  width: "2px",
+                  height: guide.end - guide.start,
+                }),
+          }}
+        />
+      ))}
+
       {/* Content with exact positioning */}
       <div
         className="p-4 overflow-visible"
-        style={{ fontFamily: settings.fontFamily, position: "relative", zIndex: 1, width: `${containerWidth}px`, height: `${containerHeight}px` }}
+        style={{ position: "relative", zIndex: 1, width: `${containerWidth}px`, height: `${containerHeight}px` }}
       >
         {/* Table Number */}
         <Draggable
           position={currentPositions.tableNumberPosition}
+          onDrag={handleDrag.bind(null, "tableNumber")}
           onStop={handleDragStop.bind(null, "tableNumber")}
-          bounds={getElementBounds(settings.tableNumberWidth, settings.tableNumberSize)}
+          bounds={getElementBounds("tableNumber")}
           handle=".drag-handle"
-          onMouseDown={() => handleComponentClick("tableNumber")} // Set as active on click
         >
-          <div className="absolute">
+          <div className="absolute" onClick={(e) => handleComponentClick("tableNumber", e)}>
             <ResizableBox
               className={activeComponent === "tableNumber" ? "resizable-active" : ""}
               width={settings.tableNumberWidth}
               height={settings.tableNumberSize}
               minConstraints={[50, 20]}
-              maxConstraints={[300, 120]}
+              maxConstraints={getMaxConstraints(currentPositions.tableNumberPosition, 50, 20)}
               onResizeStop={handleResizeStop.bind(null, "tableNumber")}
-              resizeHandles={["n", "e", "s", "w", "ne", "se", "sw", "nw"]}
+              resizeHandles={["ne", "se", "sw", "nw"]}
             >
               <div className="relative">
-                <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                  <div style={{ ...getTextStyles(), fontSize: `${settings.tableNumberSize}px` }}>
-                    {settings.tableNumber}
-                  </div>
+                <div
+                  className={`drag-handle cursor-move p-1 ${activeComponent === "tableNumber" ? "active" : ""}`}
+                  style={{ willChange: "transform", textAlign: settings.tableNumberAlignment }}
+                >
+                  {editingComponent === "tableNumber" ? (
+                    <Input
+                      value={editText}
+                      onChange={handleTextChange}
+                      onBlur={() => handleTextSave("tableNumber")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleTextSave("tableNumber");
+                        }
+                      }}
+                      autoFocus
+                      onFocus={(e) => e.target.select()}
+                      className="bg-transparent border-none p-0 m-0 w-full"
+                      style={{ fontSize: `${settings.fontSize.tableNumber}px`, textAlign: settings.tableNumberAlignment, fontFamily: settings.tableNumberFont }}
+                    />
+                  ) : (
+                    <div
+                      style={{ ...getTextStyles(), fontSize: `${settings.fontSize.tableNumber}px`, textAlign: settings.tableNumberAlignment, fontFamily: settings.tableNumberFont }}
+                      onDoubleClick={() => handleDoubleClick("tableNumber", settings.tableNumber)}
+                    >
+                      {settings.tableNumber}
+                    </div>
+                  )}
                 </div>
               </div>
             </ResizableBox>
@@ -368,34 +602,57 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         {/* Action Text */}
         <Draggable
           position={currentPositions.actionTextPosition}
+          onDrag={handleDrag.bind(null, "actionText")}
           onStop={handleDragStop.bind(null, "actionText")}
-          bounds={getElementBounds(settings.actionTextWidth, settings.actionTextSize)}
+          bounds={getElementBounds("actionText")}
           handle=".drag-handle"
-          onMouseDown={() => handleComponentClick("actionText")} // Set as active on click
         >
-          <div className="absolute">
+          <div className="absolute" onClick={(e) => handleComponentClick("actionText", e)}>
             <ResizableBox
               className={activeComponent === "actionText" ? "resizable-active" : ""}
               width={settings.actionTextWidth}
               height={settings.actionTextSize}
               minConstraints={[100, 20]}
-              maxConstraints={[400, 80]}
+              maxConstraints={getMaxConstraints(currentPositions.actionTextPosition, 100, 20)}
               onResizeStop={handleResizeStop.bind(null, "actionText")}
-              resizeHandles={["n", "e", "s", "w", "ne", "se", "sw", "nw"]}
+              resizeHandles={["ne", "se", "sw", "nw"]}
             >
               <div className="relative">
-                <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                  <div
-                    style={{
-                      ...getTextStyles(),
-                      fontSize: `${settings.actionTextSize}px`,
-                      maxWidth: "100%",
-                      whiteSpace: "normal",
-                      width: "100%", // Ensure the inner div takes the full width
-                    }}
-                  >
-                    {settings.actionText}
-                  </div>
+                <div
+                  className={`drag-handle cursor-move p-1 ${activeComponent === "actionText" ? "active" : ""}`}
+                  style={{ willChange: "transform", textAlign: settings.actionTextAlignment }}
+                >
+                  {editingComponent === "actionText" ? (
+                    <Input
+                      value={editText}
+                      onChange={handleTextChange}
+                      onBlur={() => handleTextSave("actionText")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleTextSave("actionText");
+                        }
+                      }}
+                      autoFocus
+                      onFocus={(e) => e.target.select()}
+                      className="bg-transparent border-none p-0 m-0 w-full"
+                      style={{ fontSize: `${settings.fontSize.actionText}px`, textAlign: settings.actionTextAlignment, fontFamily: settings.actionTextFont }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        ...getTextStyles(),
+                        fontSize: `${settings.fontSize.actionText}px`,
+                        maxWidth: "100%",
+                        whiteSpace: "normal",
+                        width: "100%",
+                        textAlign: settings.actionTextAlignment,
+                        fontFamily: settings.actionTextFont,
+                      }}
+                      onDoubleClick={() => handleDoubleClick("actionText", settings.actionText)}
+                    >
+                      {settings.actionText}
+                    </div>
+                  )}
                 </div>
               </div>
             </ResizableBox>
@@ -405,23 +662,23 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         {/* QR Code */}
         <Draggable
           position={currentPositions.qrCodePosition}
+          onDrag={handleDrag.bind(null, "qrCode")}
           onStop={handleDragStop.bind(null, "qrCode")}
-          bounds={getElementBounds(settings.qrCodeWidth, settings.qrCodeSize)}
+          bounds={getElementBounds("qrCode")}
           handle=".drag-handle"
-          onMouseDown={() => handleComponentClick("qrCode")} // Set as active on click
         >
-          <div className="absolute">
+          <div className="absolute" onClick={(e) => handleComponentClick("qrCode", e)}>
             <ResizableBox
               className={activeComponent === "qrCode" ? "resizable-active" : ""}
               width={settings.qrCodeWidth}
               height={settings.qrCodeSize}
               minConstraints={[80, 80]}
-              maxConstraints={[200, 200]}
+              maxConstraints={getMaxConstraints(currentPositions.qrCodePosition, 80, 80)}
               onResizeStop={handleResizeStop.bind(null, "qrCode")}
-              resizeHandles={["n", "e", "s", "w", "ne", "se", "sw", "nw"]}
+              resizeHandles={["ne", "se", "sw", "nw"]}
             >
               <div className="relative">
-                <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
+                <div className={`drag-handle cursor-move p-1 ${activeComponent === "qrCode" ? "active" : ""}`} style={{ willChange: "transform" }}>
                   <div className="bg-white p-[10px] inline-block rounded-sm">
                     <QRCodeSVG
                       value={settings.qrValue}
@@ -442,26 +699,49 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         {settings.venueName && (
           <Draggable
             position={currentPositions.venueNamePosition}
+            onDrag={handleDrag.bind(null, "venueName")}
             onStop={handleDragStop.bind(null, "venueName")}
-            bounds={getElementBounds(settings.venueNameWidth, settings.venueNameSize)}
+            bounds={getElementBounds("venueName")}
             handle=".drag-handle"
-            onMouseDown={() => handleComponentClick("venueName")} // Set as active on click
           >
-            <div className="absolute">
+            <div className="absolute" onClick={(e) => handleComponentClick("venueName", e)}>
               <ResizableBox
                 className={activeComponent === "venueName" ? "resizable-active" : ""}
                 width={settings.venueNameWidth}
                 height={settings.venueNameSize}
                 minConstraints={[60, 20]}
-                maxConstraints={[200, 40]}
+                maxConstraints={getMaxConstraints(currentPositions.venueNamePosition, 60, 20)}
                 onResizeStop={handleResizeStop.bind(null, "venueName")}
-                resizeHandles={["n", "e", "s", "w", "ne", "se", "sw", "nw"]}
+                resizeHandles={["ne", "se", "sw", "nw"]}
               >
                 <div className="relative">
-                  <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                    <div style={{ ...getTextStyles(), fontSize: `${settings.venueNameSize}px`, textAlign: "center", maxWidth: "100%", whiteSpace: "normal", width: "100%" }}>
-                      {settings.venueName}
-                    </div>
+                  <div
+                    className={`drag-handle cursor-move p-1 ${activeComponent === "venueName" ? "active" : ""}`}
+                    style={{ willChange: "transform", textAlign: settings.venueNameAlignment }}
+                  >
+                    {editingComponent === "venueName" ? (
+                      <Input
+                        value={editText}
+                        onChange={handleTextChange}
+                        onBlur={() => handleTextSave("venueName")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleTextSave("venueName");
+                          }
+                        }}
+                        autoFocus
+                        onFocus={(e) => e.target.select()}
+                        className="bg-transparent border-none p-0 m-0 w-full"
+                        style={{ fontSize: `${settings.fontSize.venueName}px`, textAlign: settings.venueNameAlignment, fontFamily: settings.venueNameFont }}
+                      />
+                    ) : (
+                      <div
+                        style={{ ...getTextStyles(), fontSize: `${settings.fontSize.venueName}px`, textAlign: settings.venueNameAlignment, maxWidth: "100%", whiteSpace: "normal", width: "100%", fontFamily: settings.venueNameFont }}
+                        onDoubleClick={() => handleDoubleClick("venueName", settings.venueName)}
+                      >
+                        {settings.venueName}
+                      </div>
+                    )}
                   </div>
                 </div>
               </ResizableBox>
@@ -473,24 +753,24 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         {settings.logoUrl && (
           <Draggable
             position={currentPositions.logoPosition}
+            onDrag={handleDrag.bind(null, "logo")}
             onStop={handleDragStop.bind(null, "logo")}
             onStart={() => console.log("Logo Drag Start")} // Debug log
-            bounds={getElementBounds(settings.logoWidth, settings.logoWidth)}
+            bounds={getElementBounds("logo")}
             handle=".drag-handle"
-            onMouseDown={() => handleComponentClick("logo")} // Set as active on click
           >
-            <div className="absolute">
+            <div className="absolute" onClick={(e) => handleComponentClick("logo", e)}>
               <ResizableBox
                 className={activeComponent === "logo" ? "resizable-active" : ""}
                 width={settings.logoWidth}
                 height={settings.logoWidth}
                 minConstraints={[20, 20]}
-                maxConstraints={[100, 100]}
+                maxConstraints={getMaxConstraints(currentPositions.logoPosition, 20, 20)}
                 onResizeStop={handleResizeStop.bind(null, "logo")}
-                resizeHandles={["n", "e", "s", "w", "ne", "se", "sw", "nw"]}
+                resizeHandles={["ne", "se", "sw", "nw"]}
               >
                 <div className="relative">
-                  <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
+                  <div className={`drag-handle cursor-move p-1 ${activeComponent === "logo" ? "active" : ""}`} style={{ willChange: "transform" }}>
                     <img
                       src={settings.logoUrl}
                       alt="Venue Logo"

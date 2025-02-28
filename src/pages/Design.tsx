@@ -38,6 +38,9 @@ interface CollateralSettings {
   shape: "rectangle" | "square" | "circle";
   pattern: string;
   fontFamily: string;
+  tableNumberFont: string; // New: Font for Table Number
+  actionTextFont: string;  // New: Font for Action Text
+  venueNameFont: string;   // New: Font for Venue Name
   textStyle: {
     bold: boolean;
     underline: boolean;
@@ -92,6 +95,9 @@ interface CollateralSettings {
   qrCodeWidth: number;
   venueNameWidth: number;
   logoWidth: number;
+  tableNumberAlignment: "left" | "center" | "right";
+  actionTextAlignment: "left" | "center" | "right";
+  venueNameAlignment: "left" | "center" | "right";
 }
 
 // Default collateral settings
@@ -109,6 +115,9 @@ const defaultSettings: CollateralSettings = {
   shape: "rectangle",
   pattern: "waves",
   fontFamily: "'Poppins', sans-serif",
+  tableNumberFont: "'Poppins', sans-serif", // Default font for Table Number
+  actionTextFont: "'Poppins', sans-serif",  // Default font for Action Text
+  venueNameFont: "'Poppins', sans-serif",   // Default font for Venue Name
   textStyle: {
     bold: false,
     underline: false,
@@ -160,6 +169,9 @@ const defaultSettings: CollateralSettings = {
   qrCodeWidth: 130,
   venueNameWidth: 200, // 18 * 3
   logoWidth: 100,
+  tableNumberAlignment: "left",
+  actionTextAlignment: "left",
+  venueNameAlignment: "center",
 };
 
 const Design = () => {

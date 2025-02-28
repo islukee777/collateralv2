@@ -1,0 +1,119 @@
+/* New Fonts Added */
+@font-face {
+    font-family: 'Afacad Flux Bold';
+    src: url('/fonts/AfacadFlux-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Afacad Flux';
+    src: url('/fonts/AfacadFlux-VariableFont_slnt,wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Atkinson Hyperlegible Mono Bold';
+    src: url('/fonts/AtkinsonHyperlegibleMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Atkinson Hyperlegible Mono';
+    src: url('/fonts/AtkinsonHyperlegibleMono-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Bangers';
+    src: url('/fonts/Bangers-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Borel';
+    src: url('/fonts/Borel-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Cherry Cream Soda';
+    src: url('/fonts/CherryCreamSoda-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Chewy';
+    src: url('/fonts/Chewy-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Edu AU VIC WANT Hand Bold';
+    src: url('/fonts/EduAUVICWANTHand-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Edu AU VIC WANT Hand';
+    src: url('/fonts/EduAUVICWANTHand-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Fugaz One';
+    src: url('/fonts/FugazOne-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Indie Flower';
+    src: url('/fonts/IndieFlower-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Noto Sans Warang Citi';
+    src: url('/fonts/NotoSansWarangCiti-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Poiret One';
+    src: url('/fonts/PoiretOne-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Short Stack';
+    src: url('/fonts/ShortStack-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Sour Gummy Italic';
+    src: url('/fonts/SourGummy-Italic-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  @font-face {
+    font-family: 'Sour Gummy';
+    src: url('/fonts/SourGummy-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
