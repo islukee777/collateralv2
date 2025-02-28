@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -130,6 +129,7 @@
     opacity: 1;
   }
 }
+
 .acrylic-thickness::before {
   content: '';
   position: absolute;
@@ -145,15 +145,92 @@
   border-radius: inherit;
   box-shadow: 0 12px 25px rgba(50, 50, 50, 0.5); /* Lighter shadow for visibility */
 }
+
+/* Hide all resize handles by default */
 .react-resizable-handle {
+  display: none;
+}
+
+/* Show handles only when the component is active */
+.resizable-active .react-resizable-handle {
+  display: block;
+}
+
+/* Side handles (north, east, south, west) - small rectangles/lines */
+.resizable-active .react-resizable-handle-n,
+.resizable-active .react-resizable-handle-s {
+  width: 12px;
+  height: 4px;
+  background-color: #007bff; /* Blue color */
+  border-radius: 2px;
   position: absolute;
-  width: 20px;
-  height: 20px;
-  bottom: 0;
-  right: 0;
-  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQgTCA2IDQgTCA2IDYgWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L3N2Zz4=') no-repeat center center;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.resizable-active .react-resizable-handle-n {
+  top: -2px;
+}
+
+.resizable-active .react-resizable-handle-s {
+  bottom: -2px;
+}
+
+.resizable-active .react-resizable-handle-e,
+.resizable-active .react-resizable-handle-w {
+  width: 4px;
+  height: 12px;
+  background-color: #007bff;
+  border-radius: 2px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.resizable-active .react-resizable-handle-e {
+  right: -2px;
+}
+
+.resizable-active .react-resizable-handle-w {
+  left: -2px;
+}
+
+/* Corner handles (northeast, southeast, southwest, northwest) - small circles */
+.resizable-active .react-resizable-handle-ne,
+.resizable-active .react-resizable-handle-se,
+.resizable-active .react-resizable-handle-sw,
+.resizable-active .react-resizable-handle-nw {
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.resizable-active .react-resizable-handle-ne {
+  top: -5px;
+  right: -5px;
+  cursor: ne-resize;
+}
+
+.resizable-active .react-resizable-handle-se {
+  bottom: -5px;
+  right: -5px;
   cursor: se-resize;
-  z-index: 10;
+}
+
+.resizable-active .react-resizable-handle-sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: sw-resize;
+}
+
+.resizable-active .react-resizable-handle-nw {
+  top: -5px;
+  left: -5px;
+  cursor: nw-resize;
 }
 
 /* Ensure the parent doesn't clip the handle */
@@ -161,24 +238,14 @@
   position: relative;
   overflow: visible !important;
 }
-.react-resizable-handle-se {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  bottom: 0;
-  right: 0;
-  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQgTCA2IDQgTCA2IDYgWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L3N2Zz4=') no-repeat center center;
-  background-color: rgba(0, 0, 255, 0.5); /* Blue handle for visibility */
-  border-radius: 4px;
-  cursor: se-resize;
-  z-index: 11; /* Ensure handle is above other elements */
-}
 
 /* Prevent the draggable parent from capturing resize events */
 .resizable-container {
   position: relative;
   display: inline-block;
 }
+
+/* Drag handle styles */
 .drag-handle {
   cursor: move;
   width: 100%; /* Ensure the drag handle stretches to the full width of the content */
@@ -187,19 +254,19 @@
   padding: 2px; /* Reduced padding to minimize extra space */
 }
 
-.drag-handle:hover {
-  outline: 2px solid blue;
-}
-.drag-handle, .react-resizable {
+/* Smooth dragging and resizing */
+.drag-handle,
+.react-resizable {
   will-change: transform;
   transition: none; /* Prevent layout shifts */
 }
-.react-resizable {
-  position: relative;
-}
+
+/* Ensure the inner content doesn't shrink the drag handle */
 .drag-handle > * {
-  display: block; /* Ensure the inner content takes the full width */
+  display: block;
 }
+
+/* Prevent default drag behavior on images */
 .drag-handle img {
   -webkit-user-drag: none;
   user-drag: none;
