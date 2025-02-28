@@ -181,6 +181,10 @@
 }
 .drag-handle {
   cursor: move;
+  width: 100%; /* Ensure the drag handle stretches to the full width of the content */
+  height: 100%; /* Ensure the drag handle stretches to the full height of the content */
+  display: block; /* Ensure the drag handle is a block element to take full width */
+  padding: 2px; /* Reduced padding to minimize extra space */
 }
 
 .drag-handle:hover {
@@ -192,4 +196,7 @@
 }
 .react-resizable {
   position: relative;
+}
+.drag-handle > * {
+  display: block; /* Ensure the inner content takes the full width */
 }

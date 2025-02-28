@@ -66,6 +66,11 @@ interface CollateralSettings {
   qrCodeSize: number;
   venueNameSize: number;
   logoSize: { width: number; height: number };
+  tableNumberWidth: number;
+  actionTextWidth: number;
+  qrCodeWidth: number;
+  venueNameWidth: number;
+  logoWidth: number;
 }
 
 interface CollateralPreviewProps {
@@ -255,19 +260,21 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
       const updates: Partial<CollateralSettings> = {};
       switch (element) {
         case "tableNumber":
-          updates.tableNumberSize = data.size.width / 2;
+          updates.tableNumberWidth = data.size.width;
           break;
         case "actionText":
-          updates.actionTextSize = data.size.width / 4;
+          updates.actionTextWidth = data.size.width;
           break;
         case "qrCode":
-          updates.qrCodeSize = data.size.width;
+          updates.qrCodeWidth = data.size.width;
+          updates.qrCodeSize = data.size.width; // Keep QR code square
           break;
         case "venueName":
-          updates.venueNameSize = data.size.width / 3;
+          updates.venueNameWidth = data.size.width;
           break;
         case "logo":
-          updates.logoSize = { width: data.size.width, height: data.size.height };
+          updates.logoWidth = data.size.width;
+          updates.logoSize = { width: data.size.width, height: data.size.width }; // Keep logo square
           break;
       }
       updateSettings(updates);
@@ -319,12 +326,12 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         <Draggable
           position={currentPositions.tableNumberPosition}
           onStop={handleDragStop.bind(null, "tableNumber")}
-          bounds={getElementBounds(settings.tableNumberSize * 2, settings.tableNumberSize)}
+          bounds={getElementBounds(settings.tableNumberWidth, settings.tableNumberSize)}
           handle=".drag-handle"
         >
           <div className="absolute">
             <ResizableBox
-              width={settings.tableNumberSize * 2}
+              width={settings.tableNumberWidth}
               height={settings.tableNumberSize}
               minConstraints={[50, 20]}
               maxConstraints={[300, 120]}
@@ -346,48 +353,47 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         <Draggable
           position={currentPositions.actionTextPosition}
           onStop={handleDragStop.bind(null, "actionText")}
-          bounds={getElementBounds(settings.actionTextSize * 4, settings.actionTextSize)}
+          bounds={getElementBounds(settings.actionTextWidth, settings.actionTextSize)}
           handle=".drag-handle"
-        >
-          <div className="absolute">
-            <ResizableBox
-              width={settings.actionTextSize * 4}
-              height={settings.actionTextSize}
-              minConstraints={[100, 20]}
-              maxConstraints={[400, 80]}
-              onResizeStop={handleResizeStop.bind(null, "actionText")}
-              resizeHandles={["se"]}
-            >
-              <div className="relative">
-                <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                  <div
-                    style={{
-                      ...getTextStyles(),
-                      fontSize: `${settings.actionTextSize}px`,
-                      maxWidth: settings.shape === "rectangle" ? "300px" : settings.shape === "square" ? "300px" : "3000px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {settings.actionText}
-                  </div>
-                </div>
-              </div>
-            </ResizableBox>
+          >
+            <div className="absolute">
+              <ResizableBox
+                width={settings.actionTextWidth}
+                height={settings.actionTextSize}
+                minConstraints={[100, 20]}
+                maxConstraints={[400, 80]}
+                onResizeStop={handleResizeStop.bind(null, "actionText")}
+                resizeHandles={["se"]}
+              >
+                <div className="relative">
+                  <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
+                    <div
+                      style={{
+                        ...getTextStyles(),
+                        fontSize: `${settings.actionTextSize}px`,
+                        maxWidth: "100%",
+                        whiteSpace: "normal",
+                        width: "100%", // Ensure the inner div takes the full width
+            }}
+          >
+            {settings.actionText}
           </div>
-        </Draggable>
+        </div>
+      </div>
+    </ResizableBox>
+  </div>
+</Draggable>
 
         {/* QR Code */}
         <Draggable
           position={currentPositions.qrCodePosition}
           onStop={handleDragStop.bind(null, "qrCode")}
-          bounds={getElementBounds(settings.qrCodeSize, settings.qrCodeSize)}
+          bounds={getElementBounds(settings.qrCodeWidth, settings.qrCodeSize)}
           handle=".drag-handle"
         >
           <div className="absolute">
             <ResizableBox
-              width={settings.qrCodeSize}
+              width={settings.qrCodeWidth}
               height={settings.qrCodeSize}
               minConstraints={[80, 80]}
               maxConstraints={[200, 200]}
@@ -413,64 +419,70 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         </Draggable>
 
         {/* Venue Name */}
-        {settings.venueName && (
-          <Draggable
-            position={currentPositions.venueNamePosition}
-            onStop={handleDragStop.bind(null, "venueName")}
-            bounds={getElementBounds(settings.venueNameSize * 3, settings.venueNameSize)}
-            handle=".drag-handle"
-          >
-            <div className="absolute">
-              <ResizableBox
-                width={settings.venueNameSize * 3}
-                height={settings.venueNameSize}
-                minConstraints={[60, 20]}
-                maxConstraints={[200, 40]}
-                onResizeStop={handleResizeStop.bind(null, "venueName")}
-                resizeHandles={["se"]}
-              >
-                <div className="relative">
-                  <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                    <div style={{ ...getTextStyles(), fontSize: `${settings.venueNameSize}px`, textAlign: "center" }}>
-                      {settings.venueName}
-                    </div>
-                  </div>
-                </div>
-              </ResizableBox>
+{settings.venueName && (
+  <Draggable
+    position={currentPositions.venueNamePosition}
+    onStop={handleDragStop.bind(null, "venueName")}
+    bounds={getElementBounds(settings.venueNameWidth, settings.venueNameSize)}
+    handle=".drag-handle"
+  >
+    <div className="absolute">
+      <ResizableBox
+        width={settings.venueNameWidth}
+        height={settings.venueNameSize}
+        minConstraints={[60, 20]}
+        maxConstraints={[200, 40]}
+        onResizeStop={handleResizeStop.bind(null, "venueName")}
+        resizeHandles={["se"]}
+      >
+        <div className="relative">
+          <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
+            <div style={{ ...getTextStyles(), fontSize: `${settings.venueNameSize}px`, textAlign: "center", maxWidth: "100%", whiteSpace: "normal", width: "100%" }}>
+              {settings.venueName}
             </div>
-          </Draggable>
-        )}
+          </div>
+        </div>
+      </ResizableBox>
+    </div>
+  </Draggable>
+)}
 
         {/* Logo */}
         {settings.logoUrl && (
-          <Draggable
-            position={currentPositions.logoPosition}
-            onStop={handleDragStop.bind(null, "logo")}
-            bounds={getElementBounds(settings.logoSize.width, settings.logoSize.height)}
-            handle=".drag-handle"
-          >
-            <div className="absolute">
-              <ResizableBox
-                width={settings.logoSize.width}
-                height={settings.logoSize.height}
-                minConstraints={[20, 20]}
-                maxConstraints={[100, 100]}
-                onResizeStop={handleResizeStop.bind(null, "logo")}
-                resizeHandles={["se"]}
-              >
-                <div className="relative">
-                  <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
-                    <img
-                      src={settings.logoUrl}
-                      alt="Venue Logo"
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </div>
-                </div>
-              </ResizableBox>
+  <Draggable
+    position={currentPositions.logoPosition}
+    onStop={(e, data) => {
+      console.log("Logo Drag Stop:", data); // Debug log
+      handleDragStop("logo", e, data);
+    }}
+    onStart={() => console.log("Logo Drag Start")} // Debug log
+    bounds={getElementBounds(settings.logoWidth, settings.logoWidth)}
+    handle=".drag-handle"
+  >
+    <div className="absolute">
+      <ResizableBox
+        width={settings.logoWidth}
+        height={settings.logoWidth}
+        minConstraints={[20, 20]}
+        maxConstraints={[100, 100]}
+        onResizeStop={handleResizeStop.bind(null, "logo")}
+        resizeHandles={["se"]}
+      >
+        <div className="relative">
+          <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform", width: "100%", height: "100%" }}>
+            <div style={{ width: "100%", height: "100%" }}>
+              <img
+                src={settings.logoUrl}
+                alt="Venue Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
             </div>
-          </Draggable>
-        )}
+          </div>
+        </div>
+      </ResizableBox>
+    </div>
+  </Draggable>
+)}
       </div>
     </div>
   );
