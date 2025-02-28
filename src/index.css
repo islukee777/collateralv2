@@ -200,3 +200,7 @@
 .drag-handle > * {
   display: block; /* Ensure the inner content takes the full width */
 }
+.drag-handle img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}

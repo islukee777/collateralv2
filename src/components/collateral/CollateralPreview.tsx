@@ -451,10 +451,7 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         {settings.logoUrl && (
   <Draggable
     position={currentPositions.logoPosition}
-    onStop={(e, data) => {
-      console.log("Logo Drag Stop:", data); // Debug log
-      handleDragStop("logo", e, data);
-    }}
+    onStop={handleDragStop.bind(null, "logo")}
     onStart={() => console.log("Logo Drag Start")} // Debug log
     bounds={getElementBounds(settings.logoWidth, settings.logoWidth)}
     handle=".drag-handle"
@@ -469,14 +466,13 @@ const CollateralPreview = React.memo(({ settings, updateSettings }: CollateralPr
         resizeHandles={["se"]}
       >
         <div className="relative">
-          <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform", width: "100%", height: "100%" }}>
-            <div style={{ width: "100%", height: "100%" }}>
-              <img
-                src={settings.logoUrl}
-                alt="Venue Logo"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
+          <div className="drag-handle cursor-move hover:outline hover:outline-2 hover:outline-blue-500 p-1" style={{ willChange: "transform" }}>
+            <img
+              src={settings.logoUrl}
+              alt="Venue Logo"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              onDragStart={(e) => e.preventDefault()} // Prevent browser's default drag behavior
+            />
           </div>
         </div>
       </ResizableBox>
