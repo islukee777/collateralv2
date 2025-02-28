@@ -64,7 +64,7 @@ interface CollateralSettings {
   tableNumberSize: number;
   actionTextSize: number;
   qrCodeSize: number;
-  venueNameSize: number;
+  venueNameSize: number,
   logoSize: { width: number; height: number };
 }
 

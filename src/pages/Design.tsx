@@ -127,22 +127,22 @@ const defaultSettings: CollateralSettings = {
   rectanglePositions: {
     tableNumberPosition: { x: 20, y: 20 },
     actionTextPosition: { x: 20, y: 90 },
-    qrCodePosition: { x: 20, y: 160 },
-    venueNamePosition: { x: 100, y: 300 },
+    qrCodePosition: { x: 20, y: 150 },
+    venueNamePosition: { x: 100, y: 310 },
     logoPosition: { x: 80, y: 20 },
   },
   squarePositions: {
-    tableNumberPosition: { x: 40, y: 20 },
-    actionTextPosition: { x: 40, y: 100 },
-    qrCodePosition: { x: 40, y: 170 },
-    venueNamePosition: { x: 200, y: 365 }, // Center of 400px width, near bottom
+    tableNumberPosition: { x: 20, y: 20 },
+    actionTextPosition: { x: 20, y: 90 },
+    qrCodePosition: { x: 20, y: 150 },
+    venueNamePosition: { x: 150, y: 310 }, // Center of 400px width, near bottom
     logoPosition: { x: 365, y: 35 },
   },
   circlePositions: {
-    tableNumberPosition: { x: 200, y: 40 }, // Center of 400px width, 10% from top
-    actionTextPosition: { x: 200, y: 100 }, // 25% from top
-    qrCodePosition: { x: 200, y: 200 }, // 50% from top
-    venueNamePosition: { x: 200, y: 360 }, // 95% from top, adjusted for height
+    tableNumberPosition: { x: 140, y: 20 }, // Center of 400px width, 10% from top
+    actionTextPosition: { x: 65, y: 100 }, // 25% from top
+    qrCodePosition: { x: 120, y: 160 }, // 50% from top
+    venueNamePosition: { x: 160, y: 320 }, // 95% from top, adjusted for height
     logoPosition: { x: 356, y: 20 }, // 95% from left, 5% from top
   },
   tableNumberSize: 48,
