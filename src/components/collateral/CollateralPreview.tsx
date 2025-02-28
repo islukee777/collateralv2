@@ -173,7 +173,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
     maxWidth: settings.shape === "rectangle" ? "300px" : "none",
     height: settings.shape === "circle" ? "400px" : "auto",
     margin: "0 auto",
-    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)", // Added shadow for depth
+    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2)", // Enhanced shadow for visibility
     ...getPatternStyle(),
   };
 
@@ -324,7 +324,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
 
     logo: {
       position: "absolute",
-      height: settings.shape === "circle" ? "24px" : "31px", // Note: This seems too large for Circle; we'll fix this
+      height: settings.shape === "circle" ? "24px" : "31px",
       width: "auto",
       ...(settings.shape === "rectangle"
         ? { top: "10px", right: "20px" }
@@ -336,7 +336,7 @@ const CollateralPreview = ({ settings }: CollateralPreviewProps) => {
 
   return (
     <div
-      className={`rounded-3xl overflow-hidden shadow-xl w-full max-w-md mx-auto relative before:content-[''] before:absolute before:inset-0 before:-z-10 before:-bottom-[10px] before:shadow-[0_10px_15px_rgba(0,0,0,0.3)] before:border-b-[15px] before:border-b-gray-500/70 before:rounded-[inherit]`}
+      className="rounded-3xl overflow-hidden w-full max-w-md mx-auto relative acrylic-thickness"
       style={containerStyle}
     >
       {/* Background image with opacity */}
