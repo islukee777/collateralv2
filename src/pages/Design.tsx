@@ -58,18 +58,16 @@ interface CollateralSettings {
     actionText: number;
     venueName: number;
   };
-
-// Add position and size for each element
-tableNumberPosition: { x: number; y: number };
-actionTextPosition: { x: number; y: number };
-qrCodePosition: { x: number; y: number };
-venueNamePosition: { x: number; y: number };
-logoPosition: { x: number; y: number };
-tableNumberSize: number; // Font size
-actionTextSize: number; // Font size
-qrCodeSize: number; // Width/height in pixels
-venueNameSize: number; // Font size
-logoSize: { width: number; height: number }; // Width/height in pixels
+  tableNumberPosition: { x: number; y: number };
+  actionTextPosition: { x: number; y: number };
+  qrCodePosition: { x: number; y: number };
+  venueNamePosition: { x: number; y: number };
+  logoPosition: { x: number; y: number };
+  tableNumberSize: number;
+  actionTextSize: number;
+  qrCodeSize: number;
+  venueNameSize: number;
+  logoSize: { width: number; height: number };
 }
 
 // Default collateral settings
@@ -107,18 +105,16 @@ const defaultSettings: CollateralSettings = {
     actionText: 30,
     venueName: 20
   },
-  // Initial positions (in pixels relative to the top-left corner)
-  tableNumberPosition: { x: 40, y: 25 }, // Matches initial fixedPositionStyles
+  tableNumberPosition: { x: 40, y: 25 },
   actionTextPosition: { x: 40, y: 90 },
   qrCodePosition: { x: 40, y: 160 },
-  venueNamePosition: { x: 150, y: 380 }, // Adjusted for bottom center
-  logoPosition: { x: 260, y: 10 }, // Top-right corner
-  // Initial sizes
-  tableNumberSize: 48, // Font size in pixels
-  actionTextSize: 30, // Font size in pixels
-  qrCodeSize: 130, // Width/height in pixels
-  venueNameSize: 20, // Font size in pixels
-  logoSize: { width: 31, height: 31 } // Width/height in pixels
+  venueNamePosition: { x: 150, y: 380 },
+  logoPosition: { x: 260, y: 10 },
+  tableNumberSize: 48,
+  actionTextSize: 30,
+  qrCodeSize: 130,
+  venueNameSize: 20,
+  logoSize: { width: 31, height: 31 }
 };
 
 const Design = () => {
@@ -207,7 +203,7 @@ const Design = () => {
           {/* Left Side - Collateral Preview */}
           <div className="flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md mx-auto bg-white/100 rounded-3xl p-8 premium-shadow overflow-visible">
-              <CollateralPreview settings={settings} />
+              <CollateralPreview settings={settings} updateSettings={updateSettings} />
             </div>
           </div>
           
